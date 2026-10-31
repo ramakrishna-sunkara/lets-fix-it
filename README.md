@@ -86,10 +86,13 @@ VITE_SUPABASE_ANON_KEY=
 
 After the first deploy, open `https://YOUR_PROJECT.vercel.app/api/health` — it should return `"ok": true`.
 
+`npm run build` also bundles the Hono API into `api/index.js` (required for Vercel Node ESM).
+
 **If the UI says API unreachable on Vercel**
 1. Project → **Settings → Environment Variables** — set `GEMINI_API_KEY` and `YOUTUBE_API_KEY` for Production + Preview, then redeploy.
 2. Project → **Settings → Deployment Protection** — turn **Vercel Authentication** off for Production (preview SSO redirects break browser `/api` calls).
-3. Prefer the Production domain over a one-off `*.vercel.app` preview URL for demos.
+3. Prefer the Production domain (`lets-fix-it.vercel.app`) over a one-off preview URL for demos.
+4. Confirm Deployments → latest → Functions includes `api/index`.
 
 ### Netlify (frontend only)
 
