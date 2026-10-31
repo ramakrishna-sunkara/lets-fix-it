@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { ConfigError, runDiagnosis } from './diagnose.ts'
-import { loadServerEnv } from './env.ts'
-import { buildPartsSearchLinks } from './parts.ts'
-import { searchYoutubeVideos } from './youtube.ts'
+import { ConfigError, runDiagnosis } from './diagnose'
+import { loadServerEnv } from './env'
+import { buildPartsSearchLinks } from './parts'
+import { searchYoutubeVideos } from './youtube'
 
 function resolveCorsOrigin(origin: string): string {
   if (!origin) {
@@ -35,6 +35,28 @@ app.use(
     origin: resolveCorsOrigin,
   }),
 )
+
+app.onError((error, c) => {
+  console.error('[api]', error)
+  return c.json(
+    {
+      error: error instanceof Error ? error.message : 'Internal server error',
+      code: 'INTERNAL_ERROR',
+    },
+    500,
+  )
+})
+
+app.notFound((c) => {
+  return c.json(
+    {
+      error: `No route matched ${c.req.method} ${c.req.path}`,
+      code: 'NOT_FOUND',
+    },
+    404,
+  )
+})
+
 
 app.get('/api/health', (c) => {
   const env = loadServerEnv()

@@ -1,6 +1,6 @@
-import type { YoutubeVideoResult } from '../shared/diagnosis.ts'
-import { loadServerEnv, missingConfigMessage } from './env.ts'
-import { ConfigError } from './diagnose.ts'
+import type { YoutubeVideoResult } from '../shared/diagnosis'
+import { loadServerEnv, missingConfigMessage } from './env'
+import { ConfigError } from './diagnose'
 
 type YoutubeSearchItem = {
   id: { videoId?: string }

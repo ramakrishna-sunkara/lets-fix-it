@@ -1,12 +1,12 @@
 import {
   DiagnosisResponseSchema,
   type DiagnosisResponse,
-} from '../shared/diagnosis.ts'
+} from '../shared/diagnosis'
 import {
   loadServerEnv,
   missingConfigMessage,
   resolveApiVersion,
-} from './env.ts'
+} from './env'
 
 const SYSTEM_PROMPT = `You are LET'S FIX IT AI — a careful repair diagnosis assistant.
 Philosophy: "Before you replace it, let's understand it and see whether we can fix it."

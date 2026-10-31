@@ -1,4 +1,4 @@
-import type { PartsSearchResult } from '../shared/diagnosis.ts'
+import type { PartsSearchResult } from '../shared/diagnosis'
 
 export function buildPartsSearchLinks(
   queries: string[],

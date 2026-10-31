@@ -1,8 +1,8 @@
 import { serve } from '@hono/node-server'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { app } from './app.ts'
-import { loadServerEnv } from './env.ts'
+import { app } from './app'
+import { loadServerEnv } from './env'
 
 function loadDotEnv(): void {
   const envPath: string = resolve(process.cwd(), '.env')
