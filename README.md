@@ -30,7 +30,7 @@ npm install
 npm run dev
 ```
 
-`npm run dev` starts the API on `:8787` and Vite on `:5173` (proxied `/api`).
+`npm run dev` starts Vite on `:5173` and **auto-starts** the Hono API on `:8787` (proxied `/api`). Use that for local demos — open http://localhost:5173.
 
 ### Required for live diagnosis
 
@@ -86,6 +86,11 @@ VITE_SUPABASE_ANON_KEY=
 
 After the first deploy, open `https://YOUR_PROJECT.vercel.app/api/health` — it should return `"ok": true`.
 
+**If the UI says API unreachable on Vercel**
+1. Project → **Settings → Environment Variables** — set `GEMINI_API_KEY` and `YOUTUBE_API_KEY` for Production + Preview, then redeploy.
+2. Project → **Settings → Deployment Protection** — turn **Vercel Authentication** off for Production (preview SSO redirects break browser `/api` calls).
+3. Prefer the Production domain over a one-off `*.vercel.app` preview URL for demos.
+
 ### Netlify (frontend only)
 
 `netlify.toml` builds the static site. For full diagnose/YouTube APIs, prefer **Vercel** (API is wired there). On Netlify you’d need separate Functions or an external API host.
@@ -109,12 +114,13 @@ After the first deploy, open `https://YOUR_PROJECT.vercel.app/api/health` — it
 
 | Command | Description |
 |---|---|
-| `npm run dev` | API + Vite together |
-| `npm run dev:web` | Frontend only |
-| `npm run dev:api` | API only |
+| `npm run dev` | Local demo (Vite + auto-started API) |
+| `npm run demo` | Same as `dev`, bound to LAN (`--host`) |
+| `npm run dev:api` | API only (`:8787`) |
+| `npm run dev:all` | Explicit concurrently API + Vite |
 | `npm run build` | Typecheck + production build |
 | `npm run lint` | Oxlint |
-| `npm run preview` | Preview production build |
+| `npm run preview` | Production build preview (also auto-starts API) |
 
 ## Project layout
 

@@ -11,33 +11,54 @@ type Services = {
   preferredModel?: string
 }
 
+const HEALTH_RETRY_MS = 2500
+
 export function ConfigStatus() {
   const [services, setServices] = useState<Services | null>(null)
-  const [unreachable, setUnreachable] = useState<boolean>(false)
+  const [unreachableMessage, setUnreachableMessage] = useState<string | null>(
+    null,
+  )
 
   useEffect(() => {
     let cancelled = false
-    void fetchHealth()
-      .then((health) => {
-        if (!cancelled) {
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    const pollHealth = (): void => {
+      void fetchHealth()
+        .then((health) => {
+          if (cancelled) {
+            return
+          }
           setServices(health.services)
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setUnreachable(true)
-        }
-      })
+          setUnreachableMessage(null)
+        })
+        .catch((error: unknown) => {
+          if (cancelled) {
+            return
+          }
+          setServices(null)
+          setUnreachableMessage(
+            error instanceof Error
+              ? error.message
+              : 'API server unreachable.',
+          )
+          timer = setTimeout(pollHealth, HEALTH_RETRY_MS)
+        })
+    }
+
+    pollHealth()
     return () => {
       cancelled = true
+      if (timer) {
+        clearTimeout(timer)
+      }
     }
   }, [])
 
-  if (unreachable) {
+  if (unreachableMessage) {
     return (
       <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-warning">
-        API server unreachable. Run `npm run dev` so the Hono API is available on
-        port 8787.
+        {unreachableMessage} Retrying…
       </div>
     )
   }

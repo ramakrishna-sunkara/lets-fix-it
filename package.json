@@ -4,12 +4,14 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n api,web -c teal,magenta \"npm run dev:api\" \"npm run dev:web\"",
+    "dev": "vite",
     "dev:web": "vite",
     "dev:api": "tsx watch server/index.ts",
+    "dev:all": "concurrently -k -n api,web -c teal,magenta \"npm run dev:api\" \"vite\"",
     "build": "tsc -b && vite build",
     "lint": "oxlint src server shared",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "demo": "vite --host"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",
