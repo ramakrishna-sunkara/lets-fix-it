@@ -86,6 +86,7 @@ export async function diagnoseProblem(payload: {
   }>
   productSummary?: Record<string, string>
   diagnosticStage?: string
+  locale?: string
 }): Promise<DiagnosisResponse> {
   const data = await requestJson<{ diagnosis: DiagnosisResponse }>(
     '/api/diagnose',

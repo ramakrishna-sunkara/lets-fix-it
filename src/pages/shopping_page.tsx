@@ -1,16 +1,18 @@
 import { useState, type FormEvent } from 'react'
 import { ExternalLink, Search } from 'lucide-react'
+import { useLocale } from '../context/locale_context'
 import { searchParts } from '../lib/api'
 import type { PartsSearchResult } from '../lib/types'
 
 export function ShoppingPage() {
+  const { t } = useLocale()
   const [query, setQuery] = useState<string>('')
   const [results, setResults] = useState<PartsSearchResult[]>([])
   const [disclaimer, setDisclaimer] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = async (event: FormEvent): Promise<void> => {
     event.preventDefault()
     if (!query.trim()) {
       return
@@ -32,11 +34,10 @@ export function ShoppingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl text-charcoal">Shopping</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">
-          External merchant search links for replacement parts. We do not invent
-          prices, stock, or verified compatibility in this POC.
-        </p>
+        <h1 className="font-display text-3xl text-charcoal">
+          {t.shopping.title}
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm text-muted">{t.shopping.subtitle}</p>
       </div>
 
       <form
@@ -48,7 +49,7 @@ export function ShoppingPage() {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="e.g. CR2032 car key fob battery Honda"
+            placeholder={t.shopping.placeholder}
             className="w-full rounded-xl border border-line bg-warm-white py-2.5 pl-10 pr-3 text-sm outline-none ring-accent focus:ring-2"
           />
         </div>
@@ -57,7 +58,7 @@ export function ShoppingPage() {
           disabled={isLoading || !query.trim()}
           className="rounded-xl bg-charcoal px-4 py-2.5 text-sm text-warm-white disabled:opacity-50"
         >
-          {isLoading ? 'Searching…' : 'Find search links'}
+          {isLoading ? t.shopping.searching : t.shopping.findLinks}
         </button>
       </form>
 

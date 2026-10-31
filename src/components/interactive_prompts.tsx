@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useLocale } from '../context/locale_context'
 import type { InteractivePrompt } from '../lib/types'
 
 export type PromptAnswer = {
@@ -17,8 +18,14 @@ export function InteractivePrompts({
   disabled = false,
   onSubmitAnswers,
 }: InteractivePromptsProps) {
+  const { t } = useLocale()
   const [selections, setSelections] = useState<Record<string, string>>({})
   const [textDrafts, setTextDrafts] = useState<Record<string, string>>({})
+  const yesNoOptions: string[] = [
+    t.prompts.yes,
+    t.prompts.no,
+    t.prompts.notSure,
+  ]
 
   const draftAnswers = useMemo(() => {
     return prompts
@@ -26,9 +33,7 @@ export function InteractivePrompts({
         const selected: string = (selections[prompt.id] || '').trim()
         const typed: string = (textDrafts[prompt.id] || '').trim()
         const answer: string =
-          prompt.input_type === 'text'
-            ? typed
-            : typed || selected
+          prompt.input_type === 'text' ? typed : typed || selected
         if (!answer) {
           return null
         }
@@ -43,7 +48,6 @@ export function InteractivePrompts({
 
   const setSelection = (promptId: string, value: string) => {
     setSelections((prev) => ({ ...prev, [promptId]: value }))
-    // Choosing a preset clears a custom typed override for that prompt.
     setTextDrafts((prev) => {
       if (!prev[promptId]) {
         return prev
@@ -61,15 +65,17 @@ export function InteractivePrompts({
     onSubmitAnswers(draftAnswers)
   }
 
+  const answeredLabel: string = t.prompts.answeredCount
+    .replace('{answered}', String(draftAnswers.length))
+    .replace('{total}', String(prompts.length))
+
   return (
     <div className="space-y-3 rounded-2xl border border-accent/20 bg-accent-soft/40 p-3">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-          Quick answers
+          {t.prompts.title}
         </p>
-        <p className="mt-1 text-xs text-muted">
-          Select answers for one or more questions, then tap Send answers.
-        </p>
+        <p className="mt-1 text-xs text-muted">{t.prompts.hint}</p>
       </div>
       {prompts.map((prompt) => {
         const selected: string = selections[prompt.id] || ''
@@ -82,7 +88,7 @@ export function InteractivePrompts({
             <p className="text-sm font-medium text-charcoal">{prompt.prompt}</p>
             {prompt.input_type === 'yes_no' ? (
               <div className="mt-3 flex flex-wrap gap-2">
-                {['Yes', 'No', 'Not sure'].map((option) => {
+                {yesNoOptions.map((option) => {
                   const isActive: boolean = selected === option && !typed
                   return (
                     <button
@@ -144,7 +150,7 @@ export function InteractivePrompts({
                       })
                     }
                   }}
-                  placeholder={prompt.placeholder || 'Or type your own…'}
+                  placeholder={prompt.placeholder || t.prompts.orTypeOwn}
                   className="w-full rounded-xl border border-line bg-warm-white px-3 py-2 text-sm outline-none ring-accent focus:ring-2"
                 />
               </div>
@@ -159,9 +165,7 @@ export function InteractivePrompts({
                     [prompt.id]: event.target.value,
                   }))
                 }
-                placeholder={
-                  prompt.placeholder || 'e.g. iPhone 13, Samsung Galaxy S21…'
-                }
+                placeholder={prompt.placeholder || t.prompts.typeAnswer}
                 className="mt-3 w-full rounded-xl border border-line bg-warm-white px-3 py-2 text-sm outline-none ring-accent focus:ring-2"
               />
             ) : null}
@@ -169,16 +173,14 @@ export function InteractivePrompts({
         )
       })}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-        <p className="text-xs text-muted">
-          {draftAnswers.length} of {prompts.length} answered
-        </p>
+        <p className="text-xs text-muted">{answeredLabel}</p>
         <button
           type="button"
           disabled={disabled || draftAnswers.length === 0}
           onClick={handleSubmitAll}
           className="rounded-xl bg-charcoal px-4 py-2 text-sm text-warm-white disabled:opacity-50"
         >
-          Send answers
+          {t.prompts.sendAnswers}
         </button>
       </div>
     </div>

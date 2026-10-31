@@ -25,26 +25,27 @@ Deno.serve(async (req) => {
         {
           title: `Search: ${query}`,
           merchant: 'Amazon',
-          url: `https://www.amazon.com/s?k=${encoded}`,
-          note: 'External search link only. Compatibility is not verified.',
+          url: `https://www.amazon.in/s?k=${encoded}`,
+          note: 'External Amazon.in search link only. Compatibility is not verified.',
           isVerifiedCompatibility: false,
         },
         {
           title: `Search: ${query}`,
-          merchant: 'eBay',
-          url: `https://www.ebay.com/sch/i.html?_nkw=${encoded}`,
-          note: 'External search link only. Verify fitment yourself.',
+          merchant: 'Flipkart',
+          url: `https://www.flipkart.com/search?q=${encoded}`,
+          note: 'External Flipkart search link only. Verify fitment yourself.',
           isVerifiedCompatibility: false,
         },
         {
-          title: `Search guides: ${query}`,
-          merchant: 'iFixit',
-          url: `https://www.ifixit.com/Search?query=${encoded}`,
-          note: 'Repair guides reference — not guaranteed model-specific.',
+          title: `Search: ${query}`,
+          merchant: 'Meesho',
+          url: `https://www.meesho.com/search?q=${encoded}`,
+          note: 'External Meesho search link only. Confirm compatibility before ordering.',
           isVerifiedCompatibility: false,
         },
       ]
     })
+
     return Response.json({
       results,
       disclaimer:

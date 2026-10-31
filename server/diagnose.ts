@@ -67,10 +67,36 @@ type IncomingMessage = {
   imageMimeType?: string
 }
 
+type AppLocale = 'en' | 'te'
+
 type DiagnoseRequest = {
   messages: IncomingMessage[]
   productSummary?: Record<string, string>
   diagnosticStage?: string
+  locale?: string
+}
+
+function normalizeLocale(value: string | undefined): AppLocale {
+  return value === 'te' ? 'te' : 'en'
+}
+
+function buildLanguageInstruction(locale: AppLocale): string {
+  if (locale === 'te') {
+    return `
+LANGUAGE RULE (critical):
+- The user's UI language is Telugu (te).
+- Write ALL user-facing JSON string values in Telugu script: assistant_message, follow_up_questions, interactive_prompts.prompt, interactive_prompts.choices, interactive_prompts.placeholder, findings, visible_evidence, possible_causes, confidence_explanation, recommended_next_step, safety_warnings, repair_tasks, product_summary.notes.
+- Keep JSON keys, diagnostic_stage enum values, difficulty enums, and boolean fields in English.
+- youtube_search_query and parts_search_queries should stay in English so search engines work well.
+- Speak naturally for a Telugu speaker. Accept user answers in Telugu or English.
+- For yes_no interactive_prompts, use Telugu choice wording in the prompt text; the UI will show అవును / కాదు / ఖచ్చితంగా తెలియదు.`
+  }
+  return `
+LANGUAGE RULE (critical):
+- The user's UI language is English (en).
+- Write ALL user-facing JSON string values in clear English.
+- Keep JSON keys and enums in English.
+- youtube_search_query and parts_search_queries should be English search phrases.`
 }
 
 function stripModelNoise(text: string): string {
@@ -185,12 +211,14 @@ function buildRequestContents(
   messages: IncomingMessage[],
   productSummary: Record<string, string> | undefined,
   diagnosticStage: string | undefined,
+  locale: AppLocale,
 ): unknown[] {
   const contextNote: string = [
     productSummary
       ? `Known product context: ${JSON.stringify(productSummary)}`
       : '',
     diagnosticStage ? `Current diagnostic stage: ${diagnosticStage}` : '',
+    `UI locale: ${locale}`,
   ]
     .filter(Boolean)
     .join('\n')
@@ -205,8 +233,9 @@ function buildRequestContents(
   const focusNote: string = latestUserText
     ? `\nActive user turn to prioritize: """${latestUserText.slice(0, 500)}"""\nFocus diagnosis and follow_up_questions on this product only.`
     : ''
+  const languageNote: string = buildLanguageInstruction(locale)
   first.parts.unshift({
-    text: `${SYSTEM_PROMPT}${focusNote}\n\nRemember: output exactly one JSON object and nothing else.`,
+    text: `${SYSTEM_PROMPT}${languageNote}${focusNote}\n\nRemember: output exactly one JSON object and nothing else.`,
   })
   return contents
 }
@@ -273,6 +302,7 @@ async function callDiagnosisModel(
   messages: IncomingMessage[],
   productSummary: Record<string, string> | undefined,
   diagnosticStage: string | undefined,
+  locale: AppLocale,
 ): Promise<ModelCallResult> {
   const env = loadServerEnv()
   if (!env.geminiApiKey) {
@@ -284,6 +314,7 @@ async function callDiagnosisModel(
     messages,
     productSummary,
     diagnosticStage,
+    locale,
   )
   // Fast demo: use Flash models only (skip slow/flaky Gemma for live demos).
   // Normal mode: prefer Gemma with timeout, then fall back to Flash.
@@ -355,6 +386,7 @@ export async function runDiagnosis(
     throw new Error('At least one message is required.')
   }
   const env = loadServerEnv()
+  const locale: AppLocale = normalizeLocale(request.locale)
   const attempt = async (
     messages: IncomingMessage[],
   ): Promise<{ diagnosis: DiagnosisResponse; modelUsed: string }> => {
@@ -362,6 +394,7 @@ export async function runDiagnosis(
       messages,
       request.productSummary,
       request.diagnosticStage,
+      locale,
     )
     const parsed: unknown = extractJsonObject(result.text)
     return {
@@ -385,12 +418,15 @@ export async function runDiagnosis(
       )
     }
     try {
+      const repairHint: string =
+        locale === 'te'
+          ? 'Your previous reply was invalid. Respond again with a single valid JSON object only — no markdown, no extra text. All user-facing string values must be in Telugu.'
+          : 'Your previous reply was invalid. Respond again with a single valid JSON object only — no markdown, no extra text.'
       const repairMessages: IncomingMessage[] = [
         ...request.messages,
         {
           role: 'user',
-          content:
-            'Your previous reply was invalid. Respond again with a single valid JSON object only — no markdown, no extra text.',
+          content: repairHint,
         },
       ]
       return await attempt(repairMessages)

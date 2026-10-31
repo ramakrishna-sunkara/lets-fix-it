@@ -30,6 +30,7 @@ import type {
   DiagnosticStage,
 } from '../lib/types'
 import { useAuth } from '../context/auth_context'
+import { useLocale } from '../context/locale_context'
 import { ConfigStatus } from './config_status'
 import { FunnyLoadingMascot } from './funny_loading_mascot'
 import {
@@ -41,19 +42,6 @@ import { StageChip } from './stage_chip'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-
-const DEMO_STARTERS = [
-  {
-    id: 'demo-car-key',
-    label: 'Car remote demo',
-    text: 'My car remote key is not locking and unlocking the car properly. I bought the car about three years ago.',
-  },
-  {
-    id: 'demo-speaker',
-    label: 'Bluetooth speaker demo',
-    text: 'My Bluetooth speaker stopped working and will not charge. The charging light behaviour changed recently.',
-  },
-]
 
 function looksLikeNewProblem(text: string): boolean {
   return /^(my|the|this)\b.+\b(is not|isn't|stopped|won't|will not|not working|broken)/i.test(
@@ -100,6 +88,7 @@ export function DiagnosticWorkspace({
   compactHero?: boolean
 }) {
   const { user } = useAuth()
+  const { t, locale, speechLang } = useLocale()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [diagnosis, setDiagnosis] = useState<DiagnosisResponse | null>(null)
   const [stage, setStage] = useState<DiagnosticStage>('gathering')
@@ -136,6 +125,22 @@ export function DiagnosticWorkspace({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isSending])
 
+  const demoStarters = useMemo(
+    () => [
+      {
+        id: 'demo-car-key',
+        label: t.home.demoCar,
+        text: t.home.demoCarText,
+      },
+      {
+        id: 'demo-speaker',
+        label: t.home.demoSpeaker,
+        text: t.home.demoSpeakerText,
+      },
+    ],
+    [t],
+  )
+
   const sessionBanner = useMemo(() => {
     const summary = diagnosis?.product_summary
     const label: string = [summary?.brand, summary?.model, summary?.category]
@@ -144,8 +149,8 @@ export function DiagnosticWorkspace({
     if (label) {
       return `Active diagnosis: ${label}. Use Start over for a different product.`
     }
-    return 'One product at a time. Demo starters open a fresh session. Use Start over when switching devices.'
-  }, [diagnosis?.product_summary])
+    return t.home.sessionBanner
+  }, [diagnosis?.product_summary, t.home.sessionBanner])
 
   const interactivePrompts = useMemo(
     () => resolveInteractivePrompts(diagnosis),
@@ -284,6 +289,7 @@ export function DiagnosticWorkspace({
         messages: apiMessages,
         productSummary: nextProductSummary,
         diagnosticStage: nextStage,
+        locale,
       })
       setDiagnosis(result)
       setStage(result.diagnostic_stage)
@@ -369,7 +375,7 @@ export function DiagnosticWorkspace({
   const toggleMic = () => {
     const Recognition = getSpeechRecognition()
     if (!Recognition) {
-      setError('Voice input is not supported in this browser.')
+      setError(t.home.voiceUnsupported)
       return
     }
     if (isListening && recognitionRef.current) {
@@ -380,7 +386,7 @@ export function DiagnosticWorkspace({
     const recognition = new Recognition()
     recognition.continuous = false
     recognition.interimResults = false
-    recognition.lang = 'en-US'
+    recognition.lang = speechLang
     recognition.onresult = (event) => {
       const transcript: string = event.results[0]?.[0]?.transcript || ''
       if (transcript) {
@@ -414,27 +420,26 @@ export function DiagnosticWorkspace({
       {!compactHero ? null : (
         <div className="rounded-3xl border border-line bg-paper/80 p-5 shadow-soft sm:p-7">
           <p className="text-xs uppercase tracking-[0.16em] text-accent">
-            Diagnostic workspace
+            {t.home.eyebrow}
           </p>
           <h1 className="mt-2 max-w-3xl font-display text-3xl leading-tight text-charcoal sm:text-5xl">
-            Before You Replace It, Let&apos;s Fix It.
+            {t.home.title}
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
-            Understand what&apos;s broken, discover how to repair it, and find
-            the right parts or professionals.
+            {t.home.subtitle}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <a
               href="#workspace"
               className="rounded-xl bg-charcoal px-4 py-2.5 text-sm text-warm-white hover:bg-graphite"
             >
-              Diagnose a Problem
+              {t.home.ctaDiagnose}
             </a>
             <a
               href="/shopping"
               className="rounded-xl border border-line px-4 py-2.5 text-sm text-charcoal hover:bg-line/40"
             >
-              Explore Repairs
+              {t.home.ctaExplore}
             </a>
           </div>
         </div>
@@ -454,14 +459,14 @@ export function DiagnosticWorkspace({
                 onChange={toggleFunnyLoading}
                 className="rounded border-line accent-accent"
               />
-              Funny loading
+              {t.home.funnyLoading}
             </label>
             <button
               type="button"
               onClick={resetSession}
               className="text-xs text-muted underline hover:text-charcoal"
             >
-              Start over
+              {t.home.startOver}
             </button>
           </div>
         </div>
@@ -469,20 +474,20 @@ export function DiagnosticWorkspace({
           {sessionBanner}
         </p>
         <div className="mb-4 flex flex-wrap gap-2">
-          {DEMO_STARTERS.map((demo) => (
+          {demoStarters.map((demo) => (
             <button
               key={demo.id}
               type="button"
               onClick={() =>
                 void startFreshDiagnosis(
                   demo.text,
-                  `Fresh ${demo.label.toLowerCase()} session started.`,
+                  `Fresh ${demo.label} session started.`,
                 )
               }
               className="rounded-full border border-line px-3 py-1.5 text-xs text-graphite hover:border-accent hover:text-accent"
               disabled={isSending}
             >
-              Try: {demo.label}
+              {t.home.tryDemo}: {demo.label}
             </button>
           ))}
         </div>
@@ -496,10 +501,7 @@ export function DiagnosticWorkspace({
           <div className="flex min-h-[28rem] flex-col rounded-2xl border border-line bg-warm-white/70">
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {messages.length === 0 ? (
-                <p className="text-sm text-muted">
-                  Describe the malfunction in ordinary language. Add a photo if
-                  you have one. The assistant will ask a few targeted follow-ups.
-                </p>
+                <p className="text-sm text-muted">{t.home.emptyChat}</p>
               ) : null}
               {messages.map((message) => (
                 <div
@@ -527,7 +529,7 @@ export function DiagnosticWorkspace({
               {isSending ? (
                 <div className="flex items-center gap-2 text-sm text-muted">
                   <LoaderCircle className="h-4 w-4 animate-spin" />
-                  Analyzing…
+                  {t.home.analyzing}
                 </div>
               ) : null}
               {!isSending && interactivePrompts.length > 0 ? (
@@ -553,7 +555,7 @@ export function DiagnosticWorkspace({
                     type="button"
                     onClick={() => setPendingImage(null)}
                     className="rounded-lg border border-line p-1 text-muted hover:text-charcoal"
-                    aria-label="Remove image"
+                    aria-label={t.home.removeImage}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -580,7 +582,7 @@ export function DiagnosticWorkspace({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="rounded-xl border border-line p-2.5 text-muted hover:bg-line/40 hover:text-charcoal"
-                  aria-label="Upload image"
+                  aria-label={t.home.uploadImage}
                 >
                   <ImagePlus className="h-5 w-5" />
                 </button>
@@ -592,7 +594,9 @@ export function DiagnosticWorkspace({
                       ? 'border-accent bg-accent-soft text-accent'
                       : 'border-line text-muted hover:bg-line/40 hover:text-charcoal'
                   }`}
-                  aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                  aria-label={
+                    isListening ? t.home.stopVoice : t.home.startVoice
+                  }
                 >
                   {isListening ? (
                     <MicOff className="h-5 w-5" />
@@ -605,14 +609,14 @@ export function DiagnosticWorkspace({
                   onChange={(event) => setInput(event.target.value)}
                   onKeyDown={onKeyDown}
                   rows={2}
-                  placeholder="Tell me what's wrong with your product..."
+                  placeholder={t.home.placeholder}
                   className="min-h-[2.75rem] flex-1 resize-none rounded-xl border border-line bg-paper px-3 py-2 text-sm outline-none ring-accent focus:ring-2"
                 />
                 <button
                   type="submit"
                   disabled={isSending || (!input.trim() && !pendingImage)}
                   className="rounded-xl bg-accent p-2.5 text-white disabled:opacity-50"
-                  aria-label="Send"
+                  aria-label={t.home.send}
                 >
                   <SendHorizontal className="h-5 w-5" />
                 </button>

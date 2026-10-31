@@ -1,11 +1,5 @@
+import { useLocale } from '../context/locale_context'
 import type { DiagnosticStage } from '../lib/types'
-
-const LABELS: Record<DiagnosticStage, string> = {
-  gathering: 'Gathering',
-  analyzing: 'Analyzing',
-  diagnosis_ready: 'Diagnosis ready',
-  repair_plan: 'Repair plan',
-}
 
 const ORDER: DiagnosticStage[] = [
   'gathering',
@@ -15,8 +9,19 @@ const ORDER: DiagnosticStage[] = [
 ]
 
 export function StageChip({ stage }: { stage: DiagnosticStage }) {
+  const { t } = useLocale()
+  const labels: Record<DiagnosticStage, string> = {
+    gathering: t.stages.gathering,
+    analyzing: t.stages.analyzing,
+    diagnosis_ready: t.stages.diagnosisReady,
+    repair_plan: t.stages.repairPlan,
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-2" aria-label="Diagnostic stage">
+    <div
+      className="flex flex-wrap items-center gap-2"
+      aria-label={t.stages.label}
+    >
       {ORDER.map((item) => {
         const isActive: boolean = item === stage
         const isPast: boolean = ORDER.indexOf(item) < ORDER.indexOf(stage)
@@ -31,7 +36,7 @@ export function StageChip({ stage }: { stage: DiagnosticStage }) {
                   : 'border-line/70 text-muted'
             }`}
           >
-            {LABELS[item]}
+            {labels[item]}
           </span>
         )
       })}

@@ -1,16 +1,19 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { Wrench } from 'lucide-react'
 import { useAuth } from '../context/auth_context'
-
-const navItems = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/diagnose', label: 'Diagnose', end: false },
-  { to: '/shopping', label: 'Shopping', end: false },
-  { to: '/my-repairs', label: 'My Repairs', end: false },
-]
+import { useLocale } from '../context/locale_context'
 
 export function Layout() {
   const { user, isConfigured, signOut } = useAuth()
+  const { t } = useLocale()
+
+  const navItems = [
+    { to: '/', label: t.nav.home, end: true },
+    { to: '/diagnose', label: t.nav.diagnose, end: false },
+    { to: '/shopping', label: t.nav.shopping, end: false },
+    { to: '/my-repairs', label: t.nav.myRepairs, end: false },
+    { to: '/profile', label: t.nav.profile, end: false },
+  ]
 
   return (
     <div className="min-h-screen">
@@ -21,7 +24,7 @@ export function Layout() {
               <Wrench className="h-4 w-4" aria-hidden />
             </span>
             <span className="font-display text-lg tracking-tight sm:text-xl">
-              LET&apos;S FIX IT AI
+              {t.brand.name}
             </span>
           </NavLink>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
@@ -49,14 +52,14 @@ export function Layout() {
                 onClick={() => void signOut()}
                 className="rounded-lg border border-line px-3 py-2 text-sm text-charcoal hover:bg-line/40"
               >
-                Sign out
+                {t.nav.signOut}
               </button>
             ) : (
               <NavLink
                 to="/auth"
                 className="rounded-lg bg-charcoal px-3 py-2 text-sm text-warm-white hover:bg-graphite"
               >
-                Sign in
+                {t.nav.signIn}
               </NavLink>
             )}
           </div>

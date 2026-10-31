@@ -1,5 +1,32 @@
 import type { PartsSearchResult } from '../shared/diagnosis'
 
+type MerchantSearch = {
+  merchant: string
+  buildUrl: (encodedQuery: string) => string
+  note: string
+}
+
+const MERCHANTS: MerchantSearch[] = [
+  {
+    merchant: 'Amazon',
+    buildUrl: (encodedQuery: string) =>
+      `https://www.amazon.in/s?k=${encodedQuery}`,
+    note: 'External Amazon.in search link only. Compatibility is not verified by LET\'S FIX IT AI. Confirm voltage, size, and connector before buying.',
+  },
+  {
+    merchant: 'Flipkart',
+    buildUrl: (encodedQuery: string) =>
+      `https://www.flipkart.com/search?q=${encodedQuery}`,
+    note: 'External Flipkart search link only. Listing details vary — verify part fitment and seller ratings yourself.',
+  },
+  {
+    merchant: 'Meesho',
+    buildUrl: (encodedQuery: string) =>
+      `https://www.meesho.com/search?q=${encodedQuery}`,
+    note: 'External Meesho search link only. Confirm model compatibility and return policy before ordering.',
+  },
+]
+
 export function buildPartsSearchLinks(
   queries: string[],
 ): PartsSearchResult[] {
@@ -13,27 +40,15 @@ export function buildPartsSearchLinks(
   const results: PartsSearchResult[] = []
   for (const query of uniqueQueries) {
     const encoded: string = encodeURIComponent(query)
-    results.push({
-      title: `Search: ${query}`,
-      merchant: 'Amazon',
-      url: `https://www.amazon.com/s?k=${encoded}`,
-      note: 'External search link only. Compatibility is not verified by LET\'S FIX IT AI. Confirm voltage, size, and connector before buying.',
-      isVerifiedCompatibility: false,
-    })
-    results.push({
-      title: `Search: ${query}`,
-      merchant: 'eBay',
-      url: `https://www.ebay.com/sch/i.html?_nkw=${encoded}`,
-      note: 'External search link only. Seller listings vary — verify part fitment yourself.',
-      isVerifiedCompatibility: false,
-    })
-    results.push({
-      title: `Search guides: ${query}`,
-      merchant: 'iFixit',
-      url: `https://www.ifixit.com/Search?query=${encoded}`,
-      note: 'Repair guides and community parts references. Not a guarantee of model-specific coverage.',
-      isVerifiedCompatibility: false,
-    })
+    for (const merchant of MERCHANTS) {
+      results.push({
+        title: `Search: ${query}`,
+        merchant: merchant.merchant,
+        url: merchant.buildUrl(encoded),
+        note: merchant.note,
+        isVerifiedCompatibility: false,
+      })
+    }
   }
   return results
 }

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/auth_context'
+import { useLocale } from '../context/locale_context'
 import { supabase, type RepairSessionRow } from '../lib/supabase'
 
 export function MyRepairsPage() {
+  const { t } = useLocale()
   const { user, isConfigured, isLoading } = useAuth()
   const [sessions, setSessions] = useState<RepairSessionRow[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -34,32 +36,30 @@ export function MyRepairsPage() {
   }, [user])
 
   if (isLoading) {
-    return <p className="text-sm text-muted">Loading…</p>
+    return <p className="text-sm text-muted">{t.myRepairs.loading}</p>
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl text-charcoal">My Repairs</h1>
-        <p className="mt-1 text-sm text-muted">
-          Saved diagnostic sessions for signed-in users when Supabase Auth is
-          configured.
-        </p>
+        <h1 className="font-display text-3xl text-charcoal">
+          {t.myRepairs.title}
+        </h1>
+        <p className="mt-1 text-sm text-muted">{t.myRepairs.subtitle}</p>
       </div>
 
       {!isConfigured ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-warning">
-          Supabase is not configured (`VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`).
-          Chat still works without saved cloud sessions. See README for setup.
+          {t.myRepairs.notConfigured}
         </div>
       ) : null}
 
       {isConfigured && !user ? (
         <p className="text-sm text-muted">
           <Link to="/auth" className="text-accent underline">
-            Sign in
+            {t.myRepairs.signInPrefix}
           </Link>{' '}
-          to sync private repair sessions across devices.
+          {t.myRepairs.signInSuffix}
         </p>
       ) : null}
 
@@ -73,18 +73,15 @@ export function MyRepairsPage() {
           >
             <p className="font-medium text-charcoal">{session.title}</p>
             <p className="mt-1 text-xs text-muted">
-              {session.category || 'Uncategorized'} · {session.status} ·{' '}
-              {new Date(session.updated_at).toLocaleString()}
+              {session.category || t.myRepairs.uncategorized} · {session.status}{' '}
+              · {new Date(session.updated_at).toLocaleString()}
             </p>
           </li>
         ))}
       </ul>
 
       {user && sessions.length === 0 && !error ? (
-        <p className="text-sm text-muted">
-          No saved cloud sessions yet. Complete a diagnosis while signed in to
-          store one.
-        </p>
+        <p className="text-sm text-muted">{t.myRepairs.empty}</p>
       ) : null}
     </div>
   )

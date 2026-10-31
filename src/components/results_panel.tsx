@@ -6,6 +6,7 @@ import {
   ShieldAlert,
   Wrench,
 } from 'lucide-react'
+import { useLocale } from '../context/locale_context'
 import { searchParts, searchYoutube } from '../lib/api'
 import type {
   DiagnosisResponse,
@@ -22,6 +23,8 @@ export function ResultsPanel({
 }: {
   diagnosis: DiagnosisResponse | null
 }) {
+  const { t } = useLocale()
+
   const [videos, setVideos] = useState<YoutubeVideoResult[]>([])
   const [parts, setParts] = useState<PartsSearchResult[]>([])
   const [videoError, setVideoError] = useState<string | null>(null)
@@ -104,8 +107,7 @@ export function ResultsPanel({
   if (!diagnosis) {
     return (
       <aside className="rounded-3xl border border-dashed border-line bg-paper/70 p-6 text-sm text-muted">
-        Diagnosis results will appear here after the assistant gathers enough
-        context. Observations, hypotheses, and unknowns stay clearly separated.
+        {t.results.empty}
       </aside>
     )
   }
