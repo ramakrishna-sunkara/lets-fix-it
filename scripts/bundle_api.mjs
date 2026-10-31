@@ -24,7 +24,12 @@ await build({
   minify: true,
   legalComments: 'none',
   logLevel: 'info',
+  // Vercel expects module.exports = handler, not { default: handler }.
+  footer: {
+    js: '\nmodule.exports = module.exports.default || module.exports;\n',
+  },
 })
+
 
 writeFileSync(
   resolve(rootDir, 'api/package.json'),
