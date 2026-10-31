@@ -13,7 +13,9 @@ import type {
   YoutubeVideoResult,
 } from '../lib/types'
 import { EvidenceLadder } from './evidence_ladder'
+import { NearbyRepairPanel } from './nearby_repair_panel'
 import { StageChip } from './stage_chip'
+import { shouldShowNearbyRepairs } from '../lib/nearby_repairs'
 
 export function ResultsPanel({
   diagnosis,
@@ -108,9 +110,16 @@ export function ResultsPanel({
     )
   }
 
+  const repairTasks = Array.isArray(diagnosis.repair_tasks)
+    ? diagnosis.repair_tasks
+    : []
+  const safetyWarnings = Array.isArray(diagnosis.safety_warnings)
+    ? diagnosis.safety_warnings
+    : []
+  const productSummary = diagnosis.product_summary || {}
   const showDiy: boolean =
     !diagnosis.requires_professional_help &&
-    diagnosis.repair_tasks.some((task) => task.difficulty === 'beginner')
+    repairTasks.some((task) => task.difficulty === 'beginner')
 
   return (
     <aside className="space-y-4">
@@ -124,17 +133,17 @@ export function ResultsPanel({
               Structured diagnosis
             </h2>
           </div>
-          <StageChip stage={diagnosis.diagnostic_stage} />
+          <StageChip stage={diagnosis.diagnostic_stage || 'gathering'} />
         </div>
         <p className="mt-3 text-sm text-graphite">
-          {diagnosis.product_summary.brand ||
-          diagnosis.product_summary.model ||
-          diagnosis.product_summary.category
+          {productSummary.brand ||
+          productSummary.model ||
+          productSummary.category
             ? [
-                diagnosis.product_summary.brand,
-                diagnosis.product_summary.model,
-                diagnosis.product_summary.year,
-                diagnosis.product_summary.category,
+                productSummary.brand,
+                productSummary.model,
+                productSummary.year,
+                productSummary.category,
               ]
                 .filter(Boolean)
                 .join(' · ')
@@ -149,8 +158,7 @@ export function ResultsPanel({
 
       <EvidenceLadder diagnosis={diagnosis} />
 
-      {diagnosis.safety_warnings.length > 0 ||
-      diagnosis.requires_professional_help ? (
+      {safetyWarnings.length > 0 || diagnosis.requires_professional_help ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-danger">
           <div className="mb-2 flex items-center gap-2 font-semibold">
             <ShieldAlert className="h-4 w-4" />
@@ -162,11 +170,15 @@ export function ResultsPanel({
             </p>
           ) : null}
           <ul className="space-y-1">
-            {diagnosis.safety_warnings.map((warning) => (
+            {safetyWarnings.map((warning) => (
               <li key={warning}>• {warning}</li>
             ))}
           </ul>
         </div>
+      ) : null}
+
+      {shouldShowNearbyRepairs(diagnosis) ? (
+        <NearbyRepairPanel diagnosis={diagnosis} />
       ) : null}
 
       <div className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
@@ -264,7 +276,7 @@ export function ResultsPanel({
           </p>
         ) : null}
         <div className="mt-3 space-y-3">
-          {diagnosis.repair_tasks.map((task) => (
+          {repairTasks.map((task) => (
             <details
               key={task.title}
               className="rounded-xl border border-line px-3 py-2"
@@ -298,7 +310,7 @@ export function ResultsPanel({
               </ol>
             </details>
           ))}
-          {diagnosis.repair_tasks.length === 0 ? (
+          {repairTasks.length === 0 ? (
             <p className="text-sm text-muted">
               Instructions appear when a repair direction is clear.
             </p>

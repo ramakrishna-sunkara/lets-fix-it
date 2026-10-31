@@ -18,14 +18,24 @@ import {
 } from 'lucide-react'
 import { diagnoseProblem, splitDataUrl } from '../lib/api'
 import {
-  clearGuestSession,
-  loadGuestSession,
-  saveGuestSession,
-} from '../lib/session_storage'
+  loadFunnyLoadingEnabled,
+  saveFunnyLoadingEnabled,
+} from '../lib/funny_loading'
+import { resolveInteractivePrompts } from '../lib/interactive_prompts'
+import { clearGuestSession } from '../lib/session_storage'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import type { ChatMessage, DiagnosisResponse, DiagnosticStage } from '../lib/types'
+import type {
+  ChatMessage,
+  DiagnosisResponse,
+  DiagnosticStage,
+} from '../lib/types'
 import { useAuth } from '../context/auth_context'
 import { ConfigStatus } from './config_status'
+import { FunnyLoadingMascot } from './funny_loading_mascot'
+import {
+  InteractivePrompts,
+  type PromptAnswer,
+} from './interactive_prompts'
 import { ResultsPanel } from './results_panel'
 import { StageChip } from './stage_chip'
 
@@ -34,16 +44,22 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 const DEMO_STARTERS = [
   {
-    id: 'car_remote',
+    id: 'demo-car-key',
     label: 'Car remote demo',
     text: 'My car remote key is not locking and unlocking the car properly. I bought the car about three years ago.',
   },
   {
-    id: 'speaker',
+    id: 'demo-speaker',
     label: 'Bluetooth speaker demo',
     text: 'My Bluetooth speaker stopped working and will not charge. The charging light behaviour changed recently.',
   },
 ]
+
+function looksLikeNewProblem(text: string): boolean {
+  return /^(my|the|this)\b.+\b(is not|isn't|stopped|won't|will not|not working|broken)/i.test(
+    text.trim(),
+  )
+}
 
 function createMessage(
   role: 'user' | 'assistant',
@@ -94,55 +110,47 @@ export function DiagnosticWorkspace({
   const [error, setError] = useState<string | null>(null)
   const [isListening, setIsListening] = useState<boolean>(false)
   const [saveNote, setSaveNote] = useState<string | null>(null)
+  const [contextNote, setContextNote] = useState<string | null>(null)
+  const [isFunnyLoadingEnabled, setIsFunnyLoadingEnabled] = useState<boolean>(
+    () => loadFunnyLoadingEnabled(),
+  )
   const fileInputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const guest = loadGuestSession()
-    if (guest) {
-      setMessages(guest.messages)
-      setDiagnosis(guest.diagnosis)
-      if (guest.diagnosis?.diagnostic_stage) {
-        setStage(guest.diagnosis.diagnostic_stage)
-      }
-    }
+    // Guest localStorage sessions are not required for the POC and caused
+    // stale-schema crashes — clear any leftover and keep chat in memory only.
+    clearGuestSession()
   }, [])
+
+  const toggleFunnyLoading = () => {
+    setIsFunnyLoadingEnabled((prev) => {
+      const next: boolean = !prev
+      saveFunnyLoadingEnabled(next)
+      return next
+    })
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isSending])
 
-  useEffect(() => {
-    if (messages.length === 0 && !diagnosis) {
-      return
+  const sessionBanner = useMemo(() => {
+    const summary = diagnosis?.product_summary
+    const label: string = [summary?.brand, summary?.model, summary?.category]
+      .filter(Boolean)
+      .join(' · ')
+    if (label) {
+      return `Active diagnosis: ${label}. Use Start over for a different product.`
     }
-    saveGuestSession({
-      title: diagnosis?.product_summary.model
-        ? `${diagnosis.product_summary.brand || ''} ${diagnosis.product_summary.model}`.trim()
-        : 'Guest diagnosis',
-      messages,
-      diagnosis,
-      updatedAt: new Date().toISOString(),
-    })
-  }, [messages, diagnosis])
+    return 'One product at a time. Demo starters open a fresh session. Use Start over when switching devices.'
+  }, [diagnosis?.product_summary])
 
-  const categoryBanner = useMemo(() => {
-    const category: string | undefined = diagnosis?.product_summary.category
-    if (!category) {
-      return 'Soft-supported demos: car remotes and Bluetooth speakers. Other categories get limited guidance.'
-    }
-    const normalized: string = category.toLowerCase()
-    if (
-      normalized.includes('remote') ||
-      normalized.includes('key') ||
-      normalized.includes('speaker') ||
-      normalized.includes('bluetooth')
-    ) {
-      return 'This session matches a primary demo category.'
-    }
-    return 'Limited support category — advice may be more generic. Confirm with a specialist when unsure.'
-  }, [diagnosis?.product_summary.category])
+  const interactivePrompts = useMemo(
+    () => resolveInteractivePrompts(diagnosis),
+    [diagnosis],
+  )
 
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file: File | undefined = event.target.files?.[0]
@@ -202,21 +210,58 @@ export function DiagnosticWorkspace({
     [user],
   )
 
-  const sendMessage = async (rawText: string) => {
+  const sendMessage = async (
+    rawText: string,
+    options?: {
+      baseMessages?: ChatMessage[]
+      resetDiagnosis?: boolean
+      notice?: string | null
+      imageDataUrl?: string | null
+      modelContent?: string
+    },
+  ) => {
     const text: string = rawText.trim()
-    if ((!text && !pendingImage) || isSending) {
+    const imageToSend: string | null =
+      options?.imageDataUrl !== undefined
+        ? options.imageDataUrl
+        : pendingImage
+    if ((!text && !imageToSend) || isSending) {
       return
     }
     setError(null)
     setSaveNote(null)
-    const userMessage = createMessage('user', text || 'Please analyze this photo.', pendingImage || undefined)
-    const nextMessages: ChatMessage[] = [...messages, userMessage]
+    if (options?.notice) {
+      setContextNote(options.notice)
+    }
+    const displayContent: string = text || 'Please analyze this photo.'
+    const modelContent: string = options?.modelContent || displayContent
+    const userMessage = createMessage(
+      'user',
+      displayContent,
+      imageToSend || undefined,
+    )
+    const historyBase: ChatMessage[] =
+      options?.baseMessages !== undefined ? options.baseMessages : messages
+    const nextMessages: ChatMessage[] = [...historyBase, userMessage]
+    const nextStage: DiagnosticStage = options?.resetDiagnosis
+      ? 'gathering'
+      : stage
+    const nextProductSummary = options?.resetDiagnosis
+      ? undefined
+      : (diagnosis?.product_summary as Record<string, string> | undefined)
     setMessages(nextMessages)
+    // Clear stale diagnosis immediately so old car-key questions cannot linger.
+    setDiagnosis(null)
+    if (options?.resetDiagnosis) {
+      setStage('gathering')
+    }
     setInput('')
     setPendingImage(null)
     setIsSending(true)
     try {
-      const apiMessages = nextMessages.map((message) => {
+      const apiMessages = nextMessages.map((message, index) => {
+        const isLatestUser: boolean =
+          index === nextMessages.length - 1 && message.role === 'user'
         const payload: {
           role: 'user' | 'assistant'
           content: string
@@ -224,7 +269,7 @@ export function DiagnosticWorkspace({
           imageMimeType?: string
         } = {
           role: message.role,
-          content: message.content,
+          content: isLatestUser ? modelContent : message.content,
         }
         if (message.imageDataUrl) {
           const split = splitDataUrl(message.imageDataUrl)
@@ -237,12 +282,15 @@ export function DiagnosticWorkspace({
       })
       const result = await diagnoseProblem({
         messages: apiMessages,
-        productSummary: diagnosis?.product_summary as Record<string, string> | undefined,
-        diagnosticStage: stage,
+        productSummary: nextProductSummary,
+        diagnosticStage: nextStage,
       })
       setDiagnosis(result)
       setStage(result.diagnostic_stage)
-      const assistantMessage = createMessage('assistant', result.assistant_message)
+      const assistantMessage = createMessage(
+        'assistant',
+        result.assistant_message,
+      )
       const withAssistant: ChatMessage[] = [...nextMessages, assistantMessage]
       setMessages(withAssistant)
       if (
@@ -258,15 +306,63 @@ export function DiagnosticWorkspace({
     }
   }
 
+  const startFreshDiagnosis = async (
+    text: string,
+    notice: string,
+    imageDataUrl?: string | null,
+  ): Promise<void> => {
+    setContextNote(notice)
+    await sendMessage(text, {
+      baseMessages: [],
+      resetDiagnosis: true,
+      notice,
+      imageDataUrl: imageDataUrl ?? null,
+    })
+  }
+
+  const handleUserSubmit = async (rawText: string): Promise<void> => {
+    const text: string = rawText.trim()
+    if (!text && !pendingImage) {
+      return
+    }
+    // No hardcoded product taxonomy — refresh when the user clearly starts a new
+    // problem statement or attaches a new photo mid-session.
+    const shouldSwitch: boolean =
+      messages.length > 0 &&
+      (Boolean(pendingImage) || looksLikeNewProblem(text))
+    if (shouldSwitch) {
+      await startFreshDiagnosis(
+        text || 'Please analyze this photo.',
+        'Started a new diagnosis so previous context does not mix in.',
+        pendingImage,
+      )
+      return
+    }
+    await sendMessage(text)
+  }
+
+  const handlePromptAnswers = (answers: PromptAnswer[]): void => {
+    if (answers.length === 0) {
+      return
+    }
+    const displayContent: string = answers
+      .map((item) => `${item.prompt.prompt}\n→ ${item.answer}`)
+      .join('\n\n')
+    const modelContent: string = answers
+      .map((item) => `Answer to "${item.prompt.prompt}": ${item.answer}`)
+      .join('\n')
+    void sendMessage(displayContent, { modelContent })
+  }
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
-    void sendMessage(input)
+    void handleUserSubmit(input)
   }
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      void sendMessage(input)
+      void handleUserSubmit(input)
     }
   }
 
@@ -309,7 +405,7 @@ export function DiagnosticWorkspace({
     setStage('gathering')
     setError(null)
     setSaveNote(null)
-    clearGuestSession()
+    setContextNote(null)
   }
 
   return (
@@ -350,23 +446,39 @@ export function DiagnosticWorkspace({
       >
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <StageChip stage={stage} />
-          <button
-            type="button"
-            onClick={resetSession}
-            className="text-xs text-muted underline hover:text-charcoal"
-          >
-            Start over
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted">
+              <input
+                type="checkbox"
+                checked={isFunnyLoadingEnabled}
+                onChange={toggleFunnyLoading}
+                className="rounded border-line accent-accent"
+              />
+              Funny loading
+            </label>
+            <button
+              type="button"
+              onClick={resetSession}
+              className="text-xs text-muted underline hover:text-charcoal"
+            >
+              Start over
+            </button>
+          </div>
         </div>
         <p className="mb-4 rounded-xl bg-accent-soft/60 px-3 py-2 text-xs text-accent">
-          {categoryBanner}
+          {sessionBanner}
         </p>
         <div className="mb-4 flex flex-wrap gap-2">
           {DEMO_STARTERS.map((demo) => (
             <button
               key={demo.id}
               type="button"
-              onClick={() => void sendMessage(demo.text)}
+              onClick={() =>
+                void startFreshDiagnosis(
+                  demo.text,
+                  `Fresh ${demo.label.toLowerCase()} session started.`,
+                )
+              }
               className="rounded-full border border-line px-3 py-1.5 text-xs text-graphite hover:border-accent hover:text-accent"
               disabled={isSending}
             >
@@ -374,6 +486,11 @@ export function DiagnosticWorkspace({
             </button>
           ))}
         </div>
+        {contextNote ? (
+          <p className="mb-4 rounded-xl border border-line bg-warm-white px-3 py-2 text-xs text-muted">
+            {contextNote}
+          </p>
+        ) : null}
 
         <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="flex min-h-[28rem] flex-col rounded-2xl border border-line bg-warm-white/70">
@@ -410,28 +527,16 @@ export function DiagnosticWorkspace({
               {isSending ? (
                 <div className="flex items-center gap-2 text-sm text-muted">
                   <LoaderCircle className="h-4 w-4 animate-spin" />
-                  Analyzing with Gemma 4…
+                  Analyzing…
                 </div>
               ) : null}
-              {diagnosis?.follow_up_questions?.length ? (
-                <div className="rounded-xl border border-dashed border-line bg-paper p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-                    Follow-ups
-                  </p>
-                  <ul className="mt-2 space-y-1 text-sm text-graphite">
-                    {diagnosis.follow_up_questions.map((question) => (
-                      <li key={question}>
-                        <button
-                          type="button"
-                          className="text-left hover:text-accent"
-                          onClick={() => setInput(question.replace(/\?$/, '') + ': ')}
-                        >
-                          • {question}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              {!isSending && interactivePrompts.length > 0 ? (
+                <InteractivePrompts
+                  key={interactivePrompts.map((prompt) => prompt.id).join('|')}
+                  prompts={interactivePrompts}
+                  disabled={isSending}
+                  onSubmitAnswers={handlePromptAnswers}
+                />
               ) : null}
               <div ref={bottomRef} />
             </div>
@@ -518,6 +623,10 @@ export function DiagnosticWorkspace({
           <ResultsPanel diagnosis={diagnosis} />
         </div>
       </div>
+
+      <FunnyLoadingMascot
+        isVisible={isSending && isFunnyLoadingEnabled}
+      />
     </section>
   )
 }

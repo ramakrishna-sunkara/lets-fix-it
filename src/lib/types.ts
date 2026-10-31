@@ -2,6 +2,7 @@ export type {
   ChatMessage,
   DiagnosisResponse,
   DiagnosticStage,
+  InteractivePrompt,
   PartsSearchResult,
   ProductSummary,
   RepairTask,

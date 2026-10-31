@@ -1,0 +1,11 @@
+# Netlify can host the static frontend.
+# Full /api diagnose + YouTube routes are set up for Vercel (recommended).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

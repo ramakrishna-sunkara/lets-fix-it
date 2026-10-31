@@ -6,6 +6,9 @@ type Services = {
   gemini: boolean
   youtube: boolean
   gemmaModel: string
+  fallbackModel?: string
+  fastDemoMode?: boolean
+  preferredModel?: string
 }
 
 export function ConfigStatus() {
@@ -57,7 +60,10 @@ export function ConfigStatus() {
   if (missing.length === 0) {
     return (
       <div className="rounded-2xl border border-teal-200 bg-accent-soft/50 px-4 py-2 text-xs text-accent">
-        Live services ready · model {services.gemmaModel}
+        Live services ready ·{' '}
+        {services.fastDemoMode
+          ? `fast demo (${services.preferredModel || services.fallbackModel || 'flash-lite'})`
+          : `preferred ${services.gemmaModel}`}
       </div>
     )
   }

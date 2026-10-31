@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/auth_context'
-import { loadGuestSession } from '../lib/session_storage'
 import { supabase, type RepairSessionRow } from '../lib/supabase'
 
 export function MyRepairsPage() {
   const { user, isConfigured, isLoading } = useAuth()
   const [sessions, setSessions] = useState<RepairSessionRow[]>([])
   const [error, setError] = useState<string | null>(null)
-  const guest = loadGuestSession()
 
   useEffect(() => {
     if (!user || !supabase) {
@@ -44,31 +42,16 @@ export function MyRepairsPage() {
       <div>
         <h1 className="font-display text-3xl text-charcoal">My Repairs</h1>
         <p className="mt-1 text-sm text-muted">
-          Saved diagnostic sessions. Private to your account when Supabase Auth
-          is configured.
+          Saved diagnostic sessions for signed-in users when Supabase Auth is
+          configured.
         </p>
       </div>
 
       {!isConfigured ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-warning">
           Supabase is not configured (`VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`).
-          Guest sessions still persist in this browser. See README for setup.
+          Chat still works without saved cloud sessions. See README for setup.
         </div>
-      ) : null}
-
-      {guest && guest.messages.length > 0 ? (
-        <section className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-          <h2 className="text-sm font-semibold">Guest session (this browser)</h2>
-          <p className="mt-1 text-sm text-graphite">{guest.title}</p>
-          <p className="mt-1 text-xs text-muted">
-            Updated {new Date(guest.updatedAt).toLocaleString()} ·{' '}
-            {guest.messages.length} messages ·{' '}
-            {guest.diagnosis?.diagnostic_stage || 'gathering'}
-          </p>
-          <Link to="/diagnose" className="mt-3 inline-block text-sm text-accent underline">
-            Resume in Diagnose
-          </Link>
-        </section>
       ) : null}
 
       {isConfigured && !user ? (

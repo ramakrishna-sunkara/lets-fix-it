@@ -18,9 +18,9 @@ Primary demos: **car remote keys** and **Bluetooth speakers**.
 ## Stack
 
 - Vite + React + TypeScript + Tailwind
-- Local Hono API (`server/`) for Gemma 4 + YouTube + parts (keeps secrets off the browser)
+- Hono API (`server/`) for Gemma / Gemini + YouTube + parts (secrets stay server-side)
+- **Vercel** recommended host (frontend + `/api` serverless)
 - Optional Supabase Auth / Postgres RLS / Storage
-- Deployable Supabase Edge Function mirrors under `supabase/functions/`
 
 ## Setup
 
@@ -36,9 +36,11 @@ npm run dev
 
 | Variable | Where | Purpose |
 |---|---|---|
-| `GEMINI_API_KEY` | `.env` (server only) | Google AI Studio key for Gemma 4 via Gemini API |
-| `GEMMA_MODEL` | `.env` (optional) | Default `gemma-4-26b-a4b-it` (alt: `gemma-4-31b-it`) |
-| `YOUTUBE_API_KEY` | `.env` (server only) | YouTube Data API v3 search |
+| `GEMINI_API_KEY` | `.env` / Vercel env (server only) | Google AI Studio key |
+| `GEMMA_MODEL` | optional | Default `gemma-4-26b-a4b-it` |
+| `GEMINI_FALLBACK_MODEL` | optional | Default `gemini-3.5-flash-lite` |
+| `FAST_DEMO_MODE` | optional | `true` = prefer Flash Lite for snappy demos |
+| `YOUTUBE_API_KEY` | `.env` / Vercel env (server only) | YouTube Data API v3 search |
 
 Get a Gemini/Gemma key: [AI Studio](https://aistudio.google.com/) · Docs: [Gemma on Gemini API](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api)
 
@@ -46,26 +48,47 @@ Get a Gemini/Gemma key: [AI Studio](https://aistudio.google.com/) · Docs: [Gemm
 
 | Variable | Where | Purpose |
 |---|---|---|
-| `VITE_SUPABASE_URL` | `.env` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | `.env` | Anon key (safe for browser) |
+| `VITE_SUPABASE_URL` | `.env` / Vercel env | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | `.env` / Vercel env | Anon key (safe for browser) |
 
 1. Create a Supabase project.
 2. Run `supabase/migrations/001_init.sql` in the SQL editor.
 3. Enable Email auth.
 4. Never put the service-role key in the frontend.
 
-Guest sessions still save in `localStorage` without Supabase.
+## Deploy on Vercel (recommended)
 
-### Deploying Edge Functions (optional)
+One project hosts the Vite UI and the Hono `/api` routes.
 
 ```bash
-supabase secrets set GEMINI_API_KEY=... YOUTUBE_API_KEY=...
-supabase functions deploy diagnose
-supabase functions deploy youtube-search
-supabase functions deploy parts-search
+npm i -g vercel
+vercel
 ```
 
-Local `server/` is the default for the POC demo.
+Or import the GitHub repo at [vercel.com/new](https://vercel.com/new).
+
+**Project settings**
+- Framework preset: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
+
+**Environment variables** (Production + Preview):
+
+```
+GEMINI_API_KEY=
+YOUTUBE_API_KEY=
+GEMMA_MODEL=gemma-4-26b-a4b-it
+GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite
+FAST_DEMO_MODE=true
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+After the first deploy, open `https://YOUR_PROJECT.vercel.app/api/health` — it should return `"ok": true`.
+
+### Netlify (frontend only)
+
+`netlify.toml` builds the static site. For full diagnose/YouTube APIs, prefer **Vercel** (API is wired there). On Netlify you’d need separate Functions or an external API host.
 
 ## Demo script (~3 minutes)
 
@@ -97,7 +120,9 @@ Local `server/` is the default for the POC demo.
 
 ```
 src/                 React UI
-server/              Hono API (diagnose / youtube / parts)
+server/              Hono API app + local Node server
+api/                 Vercel serverless entry for /api/*
 shared/              Shared Zod diagnosis schema
 supabase/            SQL migration + Edge Function mirrors
+vercel.json          Vercel build + SPA/API routing
 ```
