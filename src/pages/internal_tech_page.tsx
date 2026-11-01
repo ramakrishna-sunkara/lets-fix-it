@@ -1,7 +1,62 @@
+import type { ReactNode } from 'react'
+
 /**
  * Hidden briefing page — not linked in nav.
  * Open via address bar: /internal/tech
+ * For judges: architecture + minimal flows.
  */
+
+function Arrow() {
+  return (
+    <span className="flex shrink-0 items-center justify-center px-1 text-accent" aria-hidden>
+      →
+    </span>
+  )
+}
+
+function DownArrow() {
+  return (
+    <div className="flex justify-center py-1 text-accent" aria-hidden>
+      ↓
+    </div>
+  )
+}
+
+function FlowBox({
+  title,
+  subtitle,
+  tone = 'default',
+}: {
+  title: string
+  subtitle?: string
+  tone?: 'default' | 'primary' | 'soft'
+}) {
+  const toneClass: string =
+    tone === 'primary'
+      ? 'bg-accent text-on-primary border-transparent'
+      : tone === 'soft'
+        ? 'bg-accent-soft text-on-primary-container border-transparent'
+        : 'bg-paper text-charcoal border-line'
+  return (
+    <div
+      className={`min-w-[7.5rem] flex-1 rounded-xl border px-3 py-2 text-center shadow-soft ${toneClass}`}
+    >
+      <p className="text-xs font-medium sm:text-sm">{title}</p>
+      {subtitle ? (
+        <p className="mt-0.5 text-[10px] opacity-80 sm:text-xs">{subtitle}</p>
+      ) : null}
+    </div>
+  )
+}
+
+function FlowRow({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-stretch justify-center gap-y-2">
+      {children}
+    </div>
+  )
+}
+
 export function InternalTechPage() {
   return (
     <article className="mx-auto max-w-3xl space-y-8 pb-12">
@@ -10,116 +65,147 @@ export function InternalTechPage() {
           Internal · not linked in nav
         </p>
         <h1 className="text-3xl font-normal tracking-tight text-charcoal">
-          LET&apos;S FIX IT — tech &amp; example flow
+          Architecture &amp; flows (judges)
         </h1>
         <p className="text-sm text-muted">
-          Type <code className="rounded bg-surface-container px-1.5 py-0.5 text-xs">/internal/tech</code>{' '}
-          in the address bar when you need this page. Judges and users will not see a menu link.
+          Minimal diagrams for “how it works.” Open{' '}
+          <code className="rounded bg-surface-container px-1.5 py-0.5 text-xs">
+            /internal/tech
+          </code>{' '}
+          from the address bar only.
         </p>
       </header>
 
       <section className="md-card space-y-4 p-5 sm:p-6">
         <h2 className="text-xl font-medium text-charcoal">
-          Example flow — car key not working
+          1. System architecture (one glance)
         </h2>
-        <ol className="list-decimal space-y-4 pl-5 text-sm text-graphite">
-          <li>
-            <p className="font-medium text-charcoal">User starts</p>
-            <p className="mt-1">
-              Taps <strong>Try: Car remote demo</strong> or types:{' '}
-              <em>
-                “My car remote key is not locking and unlocking the car
-                properly. I bought the car about three years ago.”
-              </em>
-            </p>
-          </li>
-          <li>
-            <p className="font-medium text-charcoal">App → API</p>
-            <p className="mt-1">
-              Browser calls <code className="text-xs">POST /api/diagnose</code>{' '}
-              with the message, stage <code className="text-xs">gathering</code>,
-              and locale (<code className="text-xs">en</code> /{' '}
-              <code className="text-xs">te</code>).
-            </p>
-          </li>
-          <li>
-            <p className="font-medium text-charcoal">
-              <code className="text-xs">server/diagnose.ts</code>
-            </p>
-            <p className="mt-1">
-              Builds system rules + chat (+ optional photo) → calls{' '}
-              <strong>Gemma 4</strong> via Gemini API → model must return{' '}
-              <strong>one JSON object</strong> → Zod validates it.
-            </p>
-          </li>
-          <li>
-            <p className="font-medium text-charcoal">First AI reply (gathering)</p>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>
-                <strong>assistant_message</strong> — short chat reply
-              </li>
-              <li>
-                <strong>product_summary</strong> — e.g. car remote / key fob
-              </li>
-              <li>
-                <strong>interactive_prompts</strong> — Yes/No chips (LED blink?
-                works closer to car? physical key still opens door?)
-              </li>
-              <li>
-                <strong>findings</strong> — observations vs unknowns
-              </li>
-              <li>
-                <strong>possible_causes</strong> — weak coin cell, button wear,
-                interference (hypotheses, not facts)
-              </li>
-            </ul>
-          </li>
-          <li>
-            <p className="font-medium text-charcoal">User answers Quick Answers</p>
-            <p className="mt-1">
-              e.g. LED is dim / only works next to the car → another{' '}
-              <code className="text-xs">/api/diagnose</code> turn.
-            </p>
-          </li>
-          <li>
-            <p className="font-medium text-charcoal">
-              Diagnosis ready / repair plan
-            </p>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>Likely cause: flat <strong>CR2032</strong> coin cell</li>
-              <li>
-                <strong>repair_tasks</strong> — open fob → swap battery → test
-                (beginner)
-              </li>
-              <li>
-                <strong>youtube_search_query</strong> → real YouTube API search
-              </li>
-              <li>
-                <strong>parts_search_queries</strong> → Amazon.in / Flipkart /
-                Meesho search links (no fake prices)
-              </li>
-              <li>
-                Safety rule: no lithium-swelling questions for coin-cell fobs
-              </li>
-            </ul>
-          </li>
-          <li>
-            <p className="font-medium text-charcoal">UI outcome</p>
-            <p className="mt-1">
-              Evidence ladder updates → DIY steps → repair videos → parts
-              search links.
-            </p>
-          </li>
-        </ol>
-        <p className="rounded-xl bg-surface-container-low px-3 py-2 text-xs text-muted">
-          Full loop: symptom → questions → evidence → DIY battery fix → real
-          videos &amp; shop links.
+        <p className="text-sm text-muted">
+          Browser never holds AI secrets. API talks to Gemma / YouTube; shops are
+          search links only.
         </p>
+        <div className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
+          <FlowRow>
+            <FlowBox title="React UI" subtitle="Vite + Tailwind" />
+            <Arrow />
+            <FlowBox title="Hono API" subtitle="/api/*" tone="soft" />
+            <Arrow />
+            <FlowBox title="Gemma 4" subtitle="via Gemini API" tone="primary" />
+          </FlowRow>
+          <DownArrow />
+          <FlowRow>
+            <FlowBox title="YouTube API" subtitle="real videos" />
+            <Arrow />
+            <FlowBox title="Parts links" subtitle="Amazon · Flipkart · Meesho" />
+            <Arrow />
+            <FlowBox title="Supabase" subtitle="optional auth" />
+          </FlowRow>
+        </div>
       </section>
 
       <section className="md-card space-y-4 p-5 sm:p-6">
         <h2 className="text-xl font-medium text-charcoal">
-          Technical stack — what &amp; why
+          2. Minimal request flow
+        </h2>
+        <p className="text-sm text-muted">
+          What happens when the user sends a chat message (or photo).
+        </p>
+        <div className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
+          <FlowRow>
+            <FlowBox title="User" subtitle="text + photo" />
+            <Arrow />
+            <FlowBox title="POST /api/diagnose" subtitle="Hono" tone="soft" />
+          </FlowRow>
+          <DownArrow />
+          <FlowRow>
+            <FlowBox title="diagnose.ts" subtitle="prompt + history" />
+            <Arrow />
+            <FlowBox title="Gemma 4" subtitle="JSON only" tone="primary" />
+            <Arrow />
+            <FlowBox title="Zod" subtitle="validate" />
+          </FlowRow>
+          <DownArrow />
+          <FlowRow>
+            <FlowBox
+              title="UI updates"
+              subtitle="chat · prompts · evidence · videos · parts"
+              tone="soft"
+            />
+          </FlowRow>
+        </div>
+        <pre className="overflow-x-auto rounded-xl bg-charcoal px-4 py-3 text-[11px] leading-relaxed text-warm-white sm:text-xs">
+{`User → /api/diagnose → Gemma 4 → Zod JSON → UI
+         (Flash Lite only if Gemma times out)`}
+        </pre>
+      </section>
+
+      <section className="md-card space-y-4 p-5 sm:p-6">
+        <h2 className="text-xl font-medium text-charcoal">
+          3. Car key demo — user journey
+        </h2>
+        <p className="text-sm text-muted">
+          Same product path judges will see in the live demo.
+        </p>
+        <div className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
+          <FlowRow>
+            <FlowBox title="1. Symptom" subtitle="Car remote demo" />
+            <Arrow />
+            <FlowBox title="2. Questions" subtitle="Quick Answers" tone="soft" />
+            <Arrow />
+            <FlowBox title="3. Evidence" subtitle="Observed / Possible / Unknown" />
+          </FlowRow>
+          <DownArrow />
+          <FlowRow>
+            <FlowBox title="4. Plan" subtitle="CR2032 battery DIY" tone="primary" />
+            <Arrow />
+            <FlowBox title="5. Videos" subtitle="YouTube API" />
+            <Arrow />
+            <FlowBox title="6. Parts" subtitle="India shop links" />
+          </FlowRow>
+        </div>
+        <ol className="list-decimal space-y-2 pl-5 text-sm text-graphite">
+          <li>
+            Start: <em>“My car remote key is not locking…”</em>
+          </li>
+          <li>
+            API returns gathering JSON — LED? range? physical key?
+          </li>
+          <li>
+            User answers → likely flat coin cell → beginner repair steps
+          </li>
+          <li>
+            YouTube + Amazon.in / Flipkart / Meesho from search queries (no fake
+            prices)
+          </li>
+        </ol>
+      </section>
+
+      <section className="md-card space-y-4 p-5 sm:p-6">
+        <h2 className="text-xl font-medium text-charcoal">
+          4. Inside diagnose.ts
+        </h2>
+        <div className="rounded-2xl bg-surface-container-low p-4 sm:p-5">
+          <FlowRow>
+            <FlowBox title="System rules" subtitle="honesty + safety" />
+            <Arrow />
+            <FlowBox title="Locale" subtitle="EN or TE strings" />
+            <Arrow />
+            <FlowBox title="Multimodal" subtitle="inline image" />
+          </FlowRow>
+          <DownArrow />
+          <FlowRow>
+            <FlowBox title="Call Gemma" subtitle="gemma-4-26b-a4b-it" tone="primary" />
+            <Arrow />
+            <FlowBox title="Parse JSON" subtitle="strip noise" />
+            <Arrow />
+            <FlowBox title="Zod schema" subtitle="DiagnosisResponse" tone="soft" />
+          </FlowRow>
+        </div>
+      </section>
+
+      <section className="md-card space-y-4 p-5 sm:p-6">
+        <h2 className="text-xl font-medium text-charcoal">
+          5. Tech — what &amp; why
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
@@ -127,79 +213,64 @@ export function InternalTechPage() {
               <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
                 <th className="py-2 pr-3 font-medium">Technology</th>
                 <th className="py-2 pr-3 font-medium">Role</th>
-                <th className="py-2 font-medium">Purpose in this project</th>
+                <th className="py-2 font-medium">Purpose</th>
               </tr>
             </thead>
             <tbody className="text-graphite">
               <TechRow
                 name="React 19 + TypeScript"
-                role="Frontend UI"
-                purpose="Build the chat workspace, evidence panels, profile, and shopping pages with typed components."
+                role="Frontend"
+                purpose="Chat UI, evidence panels, profile, shopping"
               />
               <TechRow
                 name="Vite 8"
-                role="Dev server & build"
-                purpose="Fast local HMR; bundles the SPA for Vercel static hosting."
+                role="Build"
+                purpose="Local HMR + SPA build for Vercel"
               />
               <TechRow
                 name="Tailwind CSS 4"
                 role="Styling"
-                purpose="Utility classes + Material Design 3 tokens in index.css (surfaces, chips, buttons)."
-              />
-              <TechRow
-                name="React Router 7"
-                role="Client routing"
-                purpose="SPA routes (/diagnose, /shopping, …). This page is /internal/tech with no nav link."
+                purpose="Material Design 3 tokens and layout"
               />
               <TechRow
                 name="Hono 4"
-                role="API framework"
-                purpose="Lightweight HTTP app for /api/diagnose, /api/youtube-search, /api/parts-search, /api/health."
+                role="API"
+                purpose="/api/diagnose, youtube, parts, health"
               />
               <TechRow
-                name="Gemma 4 (open-weight)"
-                role="Primary AI model"
-                purpose="Multimodal repair diagnosis (text + photo) → structured JSON. Accessed via Gemini API."
+                name="Gemma 4"
+                role="AI (primary)"
+                purpose="Open-weight multimodal diagnosis → JSON"
               />
               <TechRow
                 name="Gemini API"
-                role="Model access"
-                purpose="Host/call Gemma (and Flash Lite fallback) with GEMINI_API_KEY kept server-side only."
+                role="Access"
+                purpose="Call Gemma; key stays on server"
               />
               <TechRow
                 name="Zod 4"
-                role="Schema validation"
-                purpose="shared/diagnosis.ts validates model JSON so the UI never trusts raw free-form output."
+                role="Validation"
+                purpose="Trust structured diagnosis only"
               />
               <TechRow
-                name="YouTube Data API v3"
-                role="Video search"
-                purpose="Real repair video IDs/titles for youtube_search_query — never invent video links."
+                name="YouTube Data API"
+                role="Videos"
+                purpose="Real repair videos, no fake IDs"
               />
               <TechRow
-                name="Amazon / Flipkart / Meesho URLs"
-                role="Parts discovery"
-                purpose="Honest search links only; no invented prices, stock, or compatibility claims."
+                name="Shop search URLs"
+                role="Parts"
+                purpose="Amazon.in / Flipkart / Meesho links only"
               />
               <TechRow
-                name="Supabase (optional)"
-                role="Auth & storage"
-                purpose="Email sign-in + RLS-backed repair_sessions for My Repairs; guest chat works without it."
+                name="Supabase"
+                role="Optional"
+                purpose="Auth + saved repairs (RLS)"
               />
               <TechRow
-                name="Vercel"
-                role="Hosting"
-                purpose="Static SPA + Node serverless api/index.js (esbuild-bundled Hono) for production demos."
-              />
-              <TechRow
-                name="esbuild"
-                role="API bundler"
-                purpose="Compile server entry to CommonJS api/index.js that Vercel’s Node runtime can load."
-              />
-              <TechRow
-                name="EN / TE i18n"
-                role="Locale"
-                purpose="UI strings + diagnose locale so Gemma replies in English or Telugu user-facing fields."
+                name="Vercel + esbuild"
+                role="Host"
+                purpose="SPA + bundled Node API"
               />
             </tbody>
           </table>
@@ -207,52 +278,32 @@ export function InternalTechPage() {
       </section>
 
       <section className="md-card space-y-3 p-5 sm:p-6">
-        <h2 className="text-xl font-medium text-charcoal">
-          Key API endpoints
-        </h2>
+        <h2 className="text-xl font-medium text-charcoal">6. API map</h2>
         <ul className="space-y-2 text-sm text-graphite">
           <li>
-            <code className="text-xs text-accent">GET /api/health</code> — keys
-            present? preferred Gemma model name
+            <code className="text-xs text-accent">GET /api/health</code> —
+            config check · Gemma preferred
           </li>
           <li>
             <code className="text-xs text-accent">POST /api/diagnose</code> —
-            chat + optional image → structured diagnosis (
-            <code className="text-xs">server/diagnose.ts</code>)
+            core AI loop
           </li>
           <li>
             <code className="text-xs text-accent">POST /api/youtube-search</code>{' '}
-            — real YouTube results for a repair query
+            — videos
           </li>
           <li>
             <code className="text-xs text-accent">POST /api/parts-search</code> —
-            merchant search URL list for part queries
+            shop links
           </li>
         </ul>
       </section>
 
-      <section className="md-card space-y-3 p-5 sm:p-6">
-        <h2 className="text-xl font-medium text-charcoal">
-          Diagnose pipeline (short)
-        </h2>
-        <pre className="overflow-x-auto rounded-xl bg-surface-container-low p-4 text-xs leading-relaxed text-graphite">
-{`UI chat (+ optional photo)
-  → POST /api/diagnose
-  → buildRequestContents (system rules + history + locale)
-  → Gemma 4 first (Flash Lite only if timeout/fail)
-  → extract JSON object
-  → Zod DiagnosisResponseSchema
-  → chat + Quick Answers + Evidence + video/parts queries`}
-        </pre>
-      </section>
-
       <p className="text-center text-xs text-muted">
-        Bookmark:{' '}
-        <span className="font-medium text-charcoal">/internal/tech</span>
-        {' · '}
-        Local: http://localhost:5173/internal/tech
-        {' · '}
-        Prod: https://lets-fix-it.vercel.app/internal/tech
+        Local preview:{' '}
+        <span className="font-medium text-charcoal">
+          http://localhost:5173/internal/tech
+        </span>
       </p>
     </article>
   )
