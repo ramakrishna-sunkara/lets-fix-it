@@ -139,3 +139,4 @@ docs/ARCHITECTURE.md Full architecture & tech reference
 
 - Architecture & tech: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**
 - Simple use-case / chat-flow / architecture diagrams: **[docs/DIAGRAMS.md](docs/DIAGRAMS.md)**
+- PowerPoint / pitch slide content: **[docs/PRESENTATION.md](docs/PRESENTATION.md)**
