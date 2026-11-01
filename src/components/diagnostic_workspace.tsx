@@ -91,7 +91,6 @@ export function DiagnosticWorkspace({
   const { t, locale, speechLang } = useLocale()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [diagnosis, setDiagnosis] = useState<DiagnosisResponse | null>(null)
-  const [modelUsed, setModelUsed] = useState<string | null>(null)
   const [stage, setStage] = useState<DiagnosticStage>('gathering')
   const [input, setInput] = useState<string>('')
   const [pendingImage, setPendingImage] = useState<string | null>(null)
@@ -294,7 +293,6 @@ export function DiagnosticWorkspace({
       })
       const nextDiagnosis: DiagnosisResponse = result.diagnosis
       setDiagnosis(nextDiagnosis)
-      setModelUsed(result.modelUsed)
       setStage(nextDiagnosis.diagnostic_stage)
       const assistantMessage = createMessage(
         'assistant',
@@ -411,7 +409,6 @@ export function DiagnosticWorkspace({
   const resetSession = () => {
     setMessages([])
     setDiagnosis(null)
-    setModelUsed(null)
     setStage('gathering')
     setError(null)
     setSaveNote(null)
@@ -620,7 +617,7 @@ export function DiagnosticWorkspace({
             </form>
           </div>
 
-          <ResultsPanel diagnosis={diagnosis} modelUsed={modelUsed} />
+          <ResultsPanel diagnosis={diagnosis} />
         </div>
       </div>
 

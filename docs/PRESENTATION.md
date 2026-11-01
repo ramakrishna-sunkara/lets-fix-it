@@ -125,7 +125,7 @@ Map to MLH challenge criteria:
 | **Focused AI tool** | Community repair assistant (home gadgets, Vizag/India shopping + Telugu) |
 | **Open model, rapid prototype** | Open-weight `gemma-4-26b-a4b-it` via Gemini API; working demo same day |
 
-**Say out loud:** *Gemma is primary — not a side feature. UI shows “Diagnosed with Gemma” after each run.*
+**Say out loud:** *Gemma is primary — not a side feature. Banner says “Powered by Gemma 4.”*
 
 **Also qualifies for:** Best Open-Source AI Project (open-weight model is core to how diagnosis works).
 
@@ -199,7 +199,6 @@ Map to MLH challenge criteria:
 - [ ] Interactive Quick Answers
 - [ ] Language switch → Telugu reply
 - [ ] Evidence ladder
-- [ ] Results: **Diagnosed with Gemma · gemma-4-…**
 - [ ] Real YouTube result
 - [ ] Amazon / Flipkart / Meesho links
 
@@ -288,7 +287,7 @@ Map to MLH challenge criteria:
 2. **Solution:** Chat + photo + honest evidence + real videos + India shop links + Telugu.  
 3. **How:** React → Hono → **Gemma 4** (open-weight, multimodal) → structured diagnosis.  
 4. **Tracks:** Best Use of Gemma 4 + Best Open-Source AI Project.  
-5. **Demo:** Car key → photo/questions → “Diagnosed with Gemma” → YouTube → shops.
+5. **Demo:** Car key → photo/questions → evidence → YouTube → shops.
 
 ---
 

@@ -29,9 +29,8 @@ One submission can enter every category it qualifies for.
 2. Run **Car remote** or **Bluetooth speaker** starter.  
 3. Optionally upload a product photo (multimodal).  
 4. Answer Quick Answers; show Evidence ladder.  
-5. Point to results line: **Diagnosed with Gemma · gemma-4-…**  
-6. Open YouTube + Amazon.in / Flipkart / Meesho.  
-7. Switch Profile language to Telugu; send one message (localized Gemma replies).
+5. Open YouTube + Amazon.in / Flipkart / Meesho.  
+6. Switch Profile language to Telugu; send one message (localized Gemma replies).
 
 ## Config for judging day
 

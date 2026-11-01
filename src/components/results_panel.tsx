@@ -20,10 +20,8 @@ import { shouldShowNearbyRepairs } from '../lib/nearby_repairs'
 
 export function ResultsPanel({
   diagnosis,
-  modelUsed = null,
 }: {
   diagnosis: DiagnosisResponse | null
-  modelUsed?: string | null
 }) {
   const { t } = useLocale()
 
@@ -136,13 +134,6 @@ export function ResultsPanel({
             <h2 className="mt-1 text-2xl font-normal tracking-tight text-charcoal">
               Structured diagnosis
             </h2>
-            {modelUsed ? (
-              <p className="mt-1 text-xs font-medium text-accent">
-                {modelUsed.toLowerCase().includes('gemma')
-                  ? `Diagnosed with Gemma · ${modelUsed}`
-                  : `Model used · ${modelUsed}`}
-              </p>
-            ) : null}
           </div>
           <StageChip stage={diagnosis.diagnostic_stage || 'gathering'} />
         </div>

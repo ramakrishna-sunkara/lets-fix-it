@@ -5,6 +5,7 @@ import { LocaleProvider } from './context/locale_context'
 import { AuthPage } from './pages/auth_page'
 import { DiagnosePage } from './pages/diagnose_page'
 import { HomePage } from './pages/home_page'
+import { InternalTechPage } from './pages/internal_tech_page'
 import { MyRepairsPage } from './pages/my_repairs_page'
 import { ProfilePage } from './pages/profile_page'
 import { ShoppingPage } from './pages/shopping_page'
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="my-repairs" element={<MyRepairsPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="auth" element={<AuthPage />} />
+              <Route path="internal/tech" element={<InternalTechPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

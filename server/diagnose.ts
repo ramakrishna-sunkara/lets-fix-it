@@ -316,7 +316,7 @@ async function callDiagnosisModel(
     diagnosticStage,
     locale,
   )
-  // Always prefer Gemma first (hackathon judging / Gemma category).
+  // Always prefer Gemma first (Hack Day / Gemma category).
   // Flash Lite is fallback only if Gemma times out or fails.
   const modelsToTry: string[] = [
     env.gemmaModel,
