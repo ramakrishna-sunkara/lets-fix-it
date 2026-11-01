@@ -134,4 +134,8 @@ api/                 Vercel serverless entry for /api/*
 shared/              Shared Zod diagnosis schema
 supabase/            SQL migration + Edge Function mirrors
 vercel.json          Vercel build + SPA/API routing
+docs/ARCHITECTURE.md Full architecture & tech reference
 ```
+
+- Architecture & tech: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**
+- Simple use-case / chat-flow / architecture diagrams: **[docs/DIAGRAMS.md](docs/DIAGRAMS.md)**
