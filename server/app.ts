@@ -68,7 +68,7 @@ app.get('/api/health', (c) => {
       gemmaModel: env.gemmaModel,
       fallbackModel: env.fallbackModel,
       fastDemoMode: env.isFastDemoMode,
-      preferredModel: env.isFastDemoMode ? env.fallbackModel : env.gemmaModel,
+      preferredModel: env.gemmaModel,
     },
   })
 })

@@ -57,7 +57,7 @@ export function ConfigStatus() {
 
   if (unreachableMessage) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-warning">
+      <div className="rounded-xl bg-warning-container px-4 py-3 text-sm text-warning">
         {unreachableMessage} Retrying…
       </div>
     )
@@ -80,17 +80,15 @@ export function ConfigStatus() {
 
   if (missing.length === 0) {
     return (
-      <div className="rounded-2xl border border-teal-200 bg-accent-soft/50 px-4 py-2 text-xs text-accent">
-        Live services ready ·{' '}
-        {services.fastDemoMode
-          ? `fast demo (${services.preferredModel || services.fallbackModel || 'flash-lite'})`
-          : `preferred ${services.gemmaModel}`}
+      <div className="md-banner">
+        Powered by Gemma 4 · preferred {services.gemmaModel}
+        {services.fastDemoMode ? ' · snappy timeout mode' : ''}
       </div>
     )
   }
 
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-warning">
+    <div className="rounded-xl bg-warning-container px-4 py-3 text-sm text-warning">
       <p className="font-medium">Integration points not fully configured</p>
       <ul className="mt-1 list-disc pl-5 text-xs">
         {missing.map((item) => (

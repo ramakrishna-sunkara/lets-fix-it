@@ -3,6 +3,11 @@
 Copy each slide into PowerPoint (or Google Slides).  
 Suggested length: **10–12 slides · ~5–7 minutes** (+ live demo).
 
+**Event:** Hacktoberfest Hack Day Vizag × AI for Vizag (MLH)  
+**Prize tracks (one submission can enter both):**
+- [Best Use of Gemma 4](https://www.mlh.com/events/hacktoberfest-hack-day-vizag-x-ai-for-vizag/challenges/01a03b87-be22-9180-5e2d-b3beeb66666d)
+- [Best Open-Source AI Project](https://www.mlh.com/events/hacktoberfest-hack-day-vizag-x-ai-for-vizag/challenges/01a0d987-0c41-12ea-13ac-5b85755dc2f3)
+
 **Live demo:** https://lets-fix-it.vercel.app  
 **Tagline:** Before you replace it, let's understand it and see whether we can fix it.
 
@@ -12,13 +17,14 @@ Suggested length: **10–12 slides · ~5–7 minutes** (+ live demo).
 
 **Title:** LET'S FIX IT AI
 
-**Subtitle:** Honest AI repair diagnosis — before you replace it
+**Subtitle:** Honest AI repair diagnosis — powered by **Gemma 4**
 
 **Footer / extras:**
-- Hackathon POC
+- Hacktoberfest Hack Day Vizag × AI for Vizag
+- Tracks: Best Use of Gemma 4 · Best Open-Source AI Project
 - Demo: `lets-fix-it.vercel.app`
 
-**Speaker notes:** Open with the problem: people replace devices too fast without understanding the fault.
+**Speaker notes:** Open with the problem: people replace devices too fast without understanding the fault. Say early: diagnosis runs on **open-weight Gemma 4** (text + photo).
 
 ---
 
@@ -107,7 +113,25 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 
 ---
 
-## Slide 7 — Architecture (simple)
+## Slide 7 — Why Gemma 4 (prize track)
+
+**Title:** Best Use of Gemma 4 — how we qualify
+
+Map to MLH challenge criteria:
+
+| Gemma 4 ask | How LET'S FIX IT uses it |
+|---|---|
+| **Multimodal** | Chat text + optional product **photo** → same Gemma diagnose call |
+| **Focused AI tool** | Community repair assistant (home gadgets, Vizag/India shopping + Telugu) |
+| **Open model, rapid prototype** | Open-weight `gemma-4-26b-a4b-it` via Gemini API; working demo same day |
+
+**Say out loud:** *Gemma is primary — not a side feature. UI shows “Diagnosed with Gemma” after each run.*
+
+**Also qualifies for:** Best Open-Source AI Project (open-weight model is core to how diagnosis works).
+
+---
+
+## Slide 8 — Architecture (simple)
 
 **Title:** System architecture
 
@@ -117,18 +141,18 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 |---|---|
 | **Frontend** | React + Vite + Tailwind (Vercel) |
 | **API** | Hono `/api` (local Node or Vercel serverless) |
-| **AI** | Gemma 4 + Gemini Flash Lite (fast demo mode) |
+| **AI** | **Gemma 4** (primary) + Gemini Flash Lite fallback only |
 | **Videos** | YouTube Data API v3 |
 | **Parts** | Amazon.in · Flipkart · Meesho search URLs |
 | **Optional** | Supabase Auth + saved repairs (RLS) |
 
-**One sentence:** *SPA talks to our API; API talks to Google & YouTube; shops are honest search links.*
+**One sentence:** *SPA talks to our API; API talks to Gemma 4 & YouTube; shops are honest search links.*
 
 *(Use architecture Mermaid from `docs/DIAGRAMS.md` §1 as a figure)*
 
 ---
 
-## Slide 8 — Tech stack
+## Slide 9 — Tech stack
 
 **Title:** Built with
 
@@ -141,14 +165,14 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 
 **Backend & host**
 - Hono API · Zod validation
-- Google AI (Gemma / Gemini)
+- **Gemma 4** (open-weight) via Gemini API
 - YouTube API
 - Vercel (frontend + API)
 - Optional Supabase
 
 ---
 
-## Slide 9 — Honesty & safety (differentiation)
+## Slide 10 — Honesty & safety (differentiation)
 
 **Title:** We don’t invent the fix
 
@@ -164,24 +188,26 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 
 ---
 
-## Slide 10 — Demo highlights
+## Slide 11 — Demo highlights
 
 **Title:** What we’ll show live
 
 **Checklist:**
+- [ ] Banner: **Powered by Gemma 4**
 - [ ] Car remote (or Bluetooth speaker) demo starter
+- [ ] Upload a **photo** (multimodal Gemma)
 - [ ] Interactive Quick Answers
 - [ ] Language switch → Telugu reply
 - [ ] Evidence ladder
+- [ ] Results: **Diagnosed with Gemma · gemma-4-…**
 - [ ] Real YouTube result
 - [ ] Amazon / Flipkart / Meesho links
-- [ ] (Optional) Funny loading mascot for demo energy
 
 **URL:** https://lets-fix-it.vercel.app
 
 ---
 
-## Slide 11 — What’s next
+## Slide 12 — What’s next
 
 **Title:** Roadmap (after the hackathon)
 
@@ -196,14 +222,15 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 
 ---
 
-## Slide 12 — Thank you / Q&A
+## Slide 13 — Thank you / Q&A
 
 **Title:** Thank you
 
 **Body:**
 - **Product:** LET'S FIX IT AI  
+- **Tracks:** Best Use of Gemma 4 · Best Open-Source AI Project  
 - **Demo:** https://lets-fix-it.vercel.app  
-- **Docs:** `docs/ARCHITECTURE.md` · `docs/DIAGRAMS.md`  
+- **Docs:** `docs/ARCHITECTURE.md` · `docs/DIAGRAMS.md` · `docs/HACK_DAY.md`  
 - **Repo:** GitHub `lets-fix-it`
 
 **Footer:** Questions?
@@ -219,7 +246,7 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 **Bullets:**
 - Messages + optional image + `locale`
 - System rules + language rule (EN/TE)
-- Fast demo → Flash Lite first; else Gemma with timeout → fallback
+- **Gemma-first** always; Flash Lite only if Gemma times out / fails
 - Zod validates one JSON object
 - Returns chat text, prompts, evidence, video query, parts queries
 
@@ -247,10 +274,10 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 
 | Tip | Suggestion |
 |---|---|
-| Theme | Warm paper / charcoal + teal accent (match the app) |
-| Fonts | One strong display font for titles; clean sans for body |
+| Theme | Material / cobalt accent (match the app) |
+| Fonts | Roboto for titles + body (Material) |
 | Density | Max 5–6 bullets per slide |
-| Demo | Keep Slide 10 + browser tab ready before presenting |
+| Demo | Keep Slide 11 + browser tab ready; show Gemma badge on results |
 | Diagrams | Screenshot Mermaid renders from `docs/DIAGRAMS.md` |
 
 ---
@@ -258,10 +285,10 @@ You type  →  App  →  /api/diagnose  →  Google AI (Gemma/Gemini)
 # 60-second pitch (if time is short)
 
 1. **Problem:** We replace gadgets without diagnosing them.  
-2. **Solution:** Chat + honest evidence + real videos + India shop links + Telugu.  
-3. **How:** React app → Hono API → Gemma/Gemini → structured diagnosis.  
-4. **Demo:** Car key → questions → evidence → YouTube → Flipkart/Amazon/Meesho.  
-5. **Ask:** Feedback & next languages / partnerships.
+2. **Solution:** Chat + photo + honest evidence + real videos + India shop links + Telugu.  
+3. **How:** React → Hono → **Gemma 4** (open-weight, multimodal) → structured diagnosis.  
+4. **Tracks:** Best Use of Gemma 4 + Best Open-Source AI Project.  
+5. **Demo:** Car key → photo/questions → “Diagnosed with Gemma” → YouTube → shops.
 
 ---
 

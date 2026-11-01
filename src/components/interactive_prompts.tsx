@@ -70,9 +70,9 @@ export function InteractivePrompts({
     .replace('{total}', String(prompts.length))
 
   return (
-    <div className="space-y-3 rounded-2xl border border-accent/20 bg-accent-soft/40 p-3">
+    <div className="space-y-3 rounded-2xl bg-accent-soft/50 p-3">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+        <p className="text-xs font-medium uppercase tracking-wide text-on-primary-container">
           {t.prompts.title}
         </p>
         <p className="mt-1 text-xs text-muted">{t.prompts.hint}</p>
@@ -81,10 +81,7 @@ export function InteractivePrompts({
         const selected: string = selections[prompt.id] || ''
         const typed: string = textDrafts[prompt.id] || ''
         return (
-          <div
-            key={prompt.id}
-            className="rounded-xl border border-line bg-paper p-3 shadow-soft"
-          >
+          <div key={prompt.id} className="md-card p-3">
             <p className="text-sm font-medium text-charcoal">{prompt.prompt}</p>
             {prompt.input_type === 'yes_no' ? (
               <div className="mt-3 flex flex-wrap gap-2">
@@ -96,10 +93,8 @@ export function InteractivePrompts({
                       type="button"
                       disabled={disabled}
                       onClick={() => setSelection(prompt.id, option)}
-                      className={`rounded-full border px-4 py-2 text-sm transition disabled:opacity-50 ${
-                        isActive
-                          ? 'border-accent bg-accent-soft text-accent'
-                          : 'border-line text-graphite hover:border-accent hover:bg-accent-soft hover:text-accent'
+                      className={`md-chip disabled:opacity-38 ${
+                        isActive ? 'md-chip-filter-active' : ''
                       }`}
                     >
                       {option}
@@ -119,10 +114,8 @@ export function InteractivePrompts({
                         type="button"
                         disabled={disabled}
                         onClick={() => setSelection(prompt.id, option)}
-                        className={`rounded-full border px-3 py-2 text-sm transition disabled:opacity-50 ${
-                          isActive
-                            ? 'border-accent bg-accent-soft text-accent'
-                            : 'border-line text-graphite hover:border-accent hover:bg-accent-soft hover:text-accent'
+                        className={`md-chip disabled:opacity-38 ${
+                          isActive ? 'md-chip-filter-active' : ''
                         }`}
                       >
                         {option}
@@ -151,7 +144,7 @@ export function InteractivePrompts({
                     }
                   }}
                   placeholder={prompt.placeholder || t.prompts.orTypeOwn}
-                  className="w-full rounded-xl border border-line bg-warm-white px-3 py-2 text-sm outline-none ring-accent focus:ring-2"
+                  className="md-field"
                 />
               </div>
             ) : null}
@@ -166,7 +159,7 @@ export function InteractivePrompts({
                   }))
                 }
                 placeholder={prompt.placeholder || t.prompts.typeAnswer}
-                className="mt-3 w-full rounded-xl border border-line bg-warm-white px-3 py-2 text-sm outline-none ring-accent focus:ring-2"
+                className="md-field mt-3"
               />
             ) : null}
           </div>
@@ -178,7 +171,7 @@ export function InteractivePrompts({
           type="button"
           disabled={disabled || draftAnswers.length === 0}
           onClick={handleSubmitAll}
-          className="rounded-xl bg-charcoal px-4 py-2 text-sm text-warm-white disabled:opacity-50"
+          className="md-btn-filled !py-2 disabled:opacity-38"
         >
           {t.prompts.sendAnswers}
         </button>

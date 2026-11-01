@@ -42,14 +42,14 @@ export function MyRepairsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl text-charcoal">
+        <h1 className="text-3xl font-normal tracking-tight text-charcoal">
           {t.myRepairs.title}
         </h1>
         <p className="mt-1 text-sm text-muted">{t.myRepairs.subtitle}</p>
       </div>
 
       {!isConfigured ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-warning">
+        <div className="rounded-xl bg-warning-container p-4 text-sm text-warning">
           {t.myRepairs.notConfigured}
         </div>
       ) : null}
@@ -69,7 +69,7 @@ export function MyRepairsPage() {
         {sessions.map((session) => (
           <li
             key={session.id}
-            className="rounded-2xl border border-line bg-paper p-4 shadow-soft"
+            className="md-card p-4"
           >
             <p className="font-medium text-charcoal">{session.title}</p>
             <p className="mt-1 text-xs text-muted">

@@ -48,11 +48,13 @@ export function ProfilePage() {
   return (
     <div className="mx-auto max-w-lg space-y-5">
       <div>
-        <h1 className="font-display text-3xl text-charcoal">{t.profile.title}</h1>
+        <h1 className="text-3xl font-normal tracking-tight text-charcoal">
+          {t.profile.title}
+        </h1>
         <p className="mt-1 text-sm text-muted">{t.profile.subtitle}</p>
       </div>
 
-      <section className="rounded-3xl border border-line bg-paper p-5 shadow-soft">
+      <section className="md-card p-5">
         <h2 className="text-sm font-medium text-charcoal">
           {t.profile.language}
         </h2>
@@ -67,10 +69,10 @@ export function ProfilePage() {
                 key={item.id}
                 type="button"
                 onClick={() => onLanguageChange(item.id)}
-                className={`rounded-2xl border px-3 py-3 text-left transition ${
+                className={`rounded-2xl px-3 py-3 text-left transition ${
                   isActive
-                    ? 'border-accent bg-accent-soft text-accent'
-                    : 'border-line bg-warm-white text-charcoal hover:border-accent/40'
+                    ? 'bg-accent-soft text-on-primary-container'
+                    : 'bg-surface-container-low text-charcoal hover:bg-surface-container'
                 }`}
                 aria-pressed={isActive}
               >
@@ -85,16 +87,16 @@ export function ProfilePage() {
       </section>
 
       {!isConfigured ? (
-        <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-warning">
+        <p className="rounded-xl bg-warning-container px-4 py-3 text-sm text-warning">
           {t.profile.notConfigured}
         </p>
       ) : null}
 
       {isConfigured && !user ? (
-        <section className="rounded-3xl border border-line bg-paper p-5 shadow-soft">
+        <section className="md-card p-5">
           <p className="text-sm text-muted">{t.profile.guestNote}</p>
           <p className="mt-3 text-sm text-muted">
-            <Link to="/auth" className="text-accent underline">
+            <Link to="/auth" className="md-btn-text !inline !p-0">
               {t.profile.signInCta}
             </Link>{' '}
             {t.profile.signInHint}
@@ -103,7 +105,7 @@ export function ProfilePage() {
       ) : null}
 
       {isConfigured && user ? (
-        <section className="space-y-4 rounded-3xl border border-line bg-paper p-5 shadow-soft">
+        <section className="md-card space-y-4 p-5">
           <div>
             <h2 className="text-sm font-medium text-charcoal">
               {t.profile.account}
@@ -116,20 +118,20 @@ export function ProfilePage() {
             onSubmit={(event) => void onProfileSubmit(event)}
             className="space-y-3"
           >
-            <label className="block text-sm">
+            <label className="block text-sm font-medium">
               {t.profile.displayName}
               <input
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-line px-3 py-2"
+                className="md-field mt-1"
               />
             </label>
-            <label className="block text-sm">
+            <label className="block text-sm font-medium">
               {t.profile.phone}
               <input
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-line px-3 py-2"
+                className="md-field mt-1"
                 placeholder="+91..."
               />
             </label>
@@ -137,7 +139,7 @@ export function ProfilePage() {
             <button
               type="submit"
               disabled={isBusy}
-              className="rounded-xl bg-charcoal px-4 py-2 text-sm text-warm-white disabled:opacity-50"
+              className="md-btn-filled disabled:opacity-38"
             >
               {t.profile.save}
             </button>
@@ -145,7 +147,7 @@ export function ProfilePage() {
           <button
             type="button"
             onClick={() => void signOut()}
-            className="text-sm text-muted underline"
+            className="md-btn-text !px-0"
           >
             {t.nav.signOut}
           </button>

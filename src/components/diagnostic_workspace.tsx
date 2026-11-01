@@ -91,6 +91,7 @@ export function DiagnosticWorkspace({
   const { t, locale, speechLang } = useLocale()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [diagnosis, setDiagnosis] = useState<DiagnosisResponse | null>(null)
+  const [modelUsed, setModelUsed] = useState<string | null>(null)
   const [stage, setStage] = useState<DiagnosticStage>('gathering')
   const [input, setInput] = useState<string>('')
   const [pendingImage, setPendingImage] = useState<string | null>(null)
@@ -291,19 +292,21 @@ export function DiagnosticWorkspace({
         diagnosticStage: nextStage,
         locale,
       })
-      setDiagnosis(result)
-      setStage(result.diagnostic_stage)
+      const nextDiagnosis: DiagnosisResponse = result.diagnosis
+      setDiagnosis(nextDiagnosis)
+      setModelUsed(result.modelUsed)
+      setStage(nextDiagnosis.diagnostic_stage)
       const assistantMessage = createMessage(
         'assistant',
-        result.assistant_message,
+        nextDiagnosis.assistant_message,
       )
       const withAssistant: ChatMessage[] = [...nextMessages, assistantMessage]
       setMessages(withAssistant)
       if (
-        result.diagnostic_stage === 'diagnosis_ready' ||
-        result.diagnostic_stage === 'repair_plan'
+        nextDiagnosis.diagnostic_stage === 'diagnosis_ready' ||
+        nextDiagnosis.diagnostic_stage === 'repair_plan'
       ) {
-        await persistToSupabase(withAssistant, result)
+        await persistToSupabase(withAssistant, nextDiagnosis)
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Diagnosis request failed')
@@ -408,6 +411,7 @@ export function DiagnosticWorkspace({
   const resetSession = () => {
     setMessages([])
     setDiagnosis(null)
+    setModelUsed(null)
     setStage('gathering')
     setError(null)
     setSaveNote(null)
@@ -418,61 +422,50 @@ export function DiagnosticWorkspace({
     <section className="space-y-4">
       <ConfigStatus />
       {!compactHero ? null : (
-        <div className="rounded-3xl border border-line bg-paper/80 p-5 shadow-soft sm:p-7">
-          <p className="text-xs uppercase tracking-[0.16em] text-accent">
+        <div className="md-card p-5 sm:p-7">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-accent">
             {t.home.eyebrow}
           </p>
-          <h1 className="mt-2 max-w-3xl font-display text-3xl leading-tight text-charcoal sm:text-5xl">
+          <h1 className="mt-2 max-w-3xl text-3xl font-normal leading-tight tracking-tight text-charcoal sm:text-5xl">
             {t.home.title}
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
             {t.home.subtitle}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <a
-              href="#workspace"
-              className="rounded-xl bg-charcoal px-4 py-2.5 text-sm text-warm-white hover:bg-graphite"
-            >
+            <a href="#workspace" className="md-btn-filled">
               {t.home.ctaDiagnose}
             </a>
-            <a
-              href="/shopping"
-              className="rounded-xl border border-line px-4 py-2.5 text-sm text-charcoal hover:bg-line/40"
-            >
+            <a href="/shopping" className="md-btn-outlined">
               {t.home.ctaExplore}
             </a>
           </div>
         </div>
       )}
 
-      <div
-        id="workspace"
-        className="rounded-3xl border border-line bg-paper p-4 shadow-soft sm:p-5"
-      >
+      <div id="workspace" className="md-card p-4 sm:p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <StageChip stage={stage} />
           <div className="flex flex-wrap items-center gap-3">
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted">
+            <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-muted">
               <input
                 type="checkbox"
                 checked={isFunnyLoadingEnabled}
                 onChange={toggleFunnyLoading}
-                className="rounded border-line accent-accent"
+                className="h-4 w-4 rounded accent-accent"
               />
               {t.home.funnyLoading}
             </label>
             <button
               type="button"
               onClick={resetSession}
-              className="text-xs text-muted underline hover:text-charcoal"
+              className="md-btn-text !px-2 !py-1 text-xs"
             >
               {t.home.startOver}
             </button>
           </div>
         </div>
-        <p className="mb-4 rounded-xl bg-accent-soft/60 px-3 py-2 text-xs text-accent">
-          {sessionBanner}
-        </p>
+        <p className="md-banner mb-4">{sessionBanner}</p>
         <div className="mb-4 flex flex-wrap gap-2">
           {demoStarters.map((demo) => (
             <button
@@ -484,7 +477,7 @@ export function DiagnosticWorkspace({
                   `Fresh ${demo.label} session started.`,
                 )
               }
-              className="rounded-full border border-line px-3 py-1.5 text-xs text-graphite hover:border-accent hover:text-accent"
+              className="md-chip"
               disabled={isSending}
             >
               {t.home.tryDemo}: {demo.label}
@@ -492,13 +485,13 @@ export function DiagnosticWorkspace({
           ))}
         </div>
         {contextNote ? (
-          <p className="mb-4 rounded-xl border border-line bg-warm-white px-3 py-2 text-xs text-muted">
+          <p className="mb-4 rounded-xl bg-surface-container-low px-3 py-2 text-xs text-muted">
             {contextNote}
           </p>
         ) : null}
 
         <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="flex min-h-[28rem] flex-col rounded-2xl border border-line bg-warm-white/70">
+          <div className="flex min-h-[28rem] flex-col overflow-hidden rounded-2xl bg-surface-container-low">
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {messages.length === 0 ? (
                 <p className="text-sm text-muted">{t.home.emptyChat}</p>
@@ -509,10 +502,10 @@ export function DiagnosticWorkspace({
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                    className={`max-w-[90%] px-3.5 py-2.5 text-sm ${
                       message.role === 'user'
-                        ? 'bg-charcoal text-warm-white'
-                        : 'border border-line bg-paper text-graphite'
+                        ? 'rounded-[20px] rounded-br-md bg-accent text-on-primary'
+                        : 'rounded-[20px] rounded-bl-md bg-secondary-container text-on-secondary-container'
                     }`}
                   >
                     {message.imageDataUrl ? (
@@ -543,18 +536,21 @@ export function DiagnosticWorkspace({
               <div ref={bottomRef} />
             </div>
 
-            <form onSubmit={onSubmit} className="border-t border-line p-3">
+            <form
+              onSubmit={onSubmit}
+              className="border-t border-line/60 bg-paper p-3"
+            >
               {pendingImage ? (
                 <div className="mb-2 flex items-center gap-2">
                   <img
                     src={pendingImage}
                     alt="Pending upload"
-                    className="h-14 w-14 rounded-lg object-cover"
+                    className="h-14 w-14 rounded-xl object-cover"
                   />
                   <button
                     type="button"
                     onClick={() => setPendingImage(null)}
-                    className="rounded-lg border border-line p-1 text-muted hover:text-charcoal"
+                    className="md-icon-btn"
                     aria-label={t.home.removeImage}
                   >
                     <X className="h-4 w-4" />
@@ -568,9 +564,9 @@ export function DiagnosticWorkspace({
                 <p className="mb-2 text-xs text-danger">{error}</p>
               ) : null}
               {saveNote ? (
-                <p className="mb-2 text-xs text-accent">{saveNote}</p>
+                <p className="mb-2 text-xs font-medium text-accent">{saveNote}</p>
               ) : null}
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-1.5">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -581,7 +577,7 @@ export function DiagnosticWorkspace({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="rounded-xl border border-line p-2.5 text-muted hover:bg-line/40 hover:text-charcoal"
+                  className="md-icon-btn"
                   aria-label={t.home.uploadImage}
                 >
                   <ImagePlus className="h-5 w-5" />
@@ -589,10 +585,10 @@ export function DiagnosticWorkspace({
                 <button
                   type="button"
                   onClick={toggleMic}
-                  className={`rounded-xl border p-2.5 ${
+                  className={`md-icon-btn ${
                     isListening
-                      ? 'border-accent bg-accent-soft text-accent'
-                      : 'border-line text-muted hover:bg-line/40 hover:text-charcoal'
+                      ? 'bg-accent-soft text-on-primary-container'
+                      : ''
                   }`}
                   aria-label={
                     isListening ? t.home.stopVoice : t.home.startVoice
@@ -610,12 +606,12 @@ export function DiagnosticWorkspace({
                   onKeyDown={onKeyDown}
                   rows={2}
                   placeholder={t.home.placeholder}
-                  className="min-h-[2.75rem] flex-1 resize-none rounded-xl border border-line bg-paper px-3 py-2 text-sm outline-none ring-accent focus:ring-2"
+                  className="md-field min-h-[2.75rem] flex-1 resize-none !rounded-2xl !border-0"
                 />
                 <button
                   type="submit"
                   disabled={isSending || (!input.trim() && !pendingImage)}
-                  className="rounded-xl bg-accent p-2.5 text-white disabled:opacity-50"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-primary disabled:opacity-38"
                   aria-label={t.home.send}
                 >
                   <SendHorizontal className="h-5 w-5" />
@@ -624,7 +620,7 @@ export function DiagnosticWorkspace({
             </form>
           </div>
 
-          <ResultsPanel diagnosis={diagnosis} />
+          <ResultsPanel diagnosis={diagnosis} modelUsed={modelUsed} />
         </div>
       </div>
 

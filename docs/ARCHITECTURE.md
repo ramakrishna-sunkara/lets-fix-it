@@ -218,9 +218,10 @@ CORS allows localhost, `*.vercel.app`, `*.netlify.app`, plus `FRONTEND_ORIGIN` a
 
 1. Validate request has messages.
 2. Build Gemini contents: system prompt + **language rule** + session context + chat (+ optional image inline data).
-3. Model cascade (depends on `FAST_DEMO_MODE`):
-   - **Fast demo (`true`)**: Flash Lite first (skip slow Gemma for live demos).
-   - **Normal**: Gemma first (with `GEMMA_TIMEOUT_MS`), then Flash fallbacks.
+3. Model cascade:
+   - **Always Gemma-first** (hackathon / Gemma judging category).
+   - Flash Lite only if Gemma times out (`GEMMA_TIMEOUT_MS`) or fails.
+   - `FAST_DEMO_MODE=true` only shortens Gemma timeout / output tokens — it does not skip Gemma.
 4. Strip model noise; extract JSON object; validate with Zod (`DiagnosisResponseSchema`).
 5. Return `{ diagnosis, modelUsed }`.
 
@@ -251,8 +252,8 @@ No prices, stock, or verified compatibility.
 | `GEMINI_API_KEY` | Required for diagnose |
 | `GEMMA_MODEL` | `gemma-4-26b-a4b-it` |
 | `GEMINI_FALLBACK_MODEL` | `gemini-3.5-flash-lite` |
-| `FAST_DEMO_MODE` | `true` |
-| `GEMMA_TIMEOUT_MS` | `8000` in fast demo |
+| `FAST_DEMO_MODE` | `false` (Gemma-first; `true` only shortens timeout) |
+| `GEMMA_TIMEOUT_MS` | `25000` default / `12000` in fast demo |
 | `YOUTUBE_API_KEY` | Required for videos |
 | `API_PORT` | `8787` (local only) |
 | `FRONTEND_ORIGIN` | Optional CORS extras |
@@ -338,7 +339,8 @@ Vercel Node + root `"type": "module"` failed to resolve extensionless/`../server
 ```
 GEMINI_API_KEY
 YOUTUBE_API_KEY
-FAST_DEMO_MODE=true
+FAST_DEMO_MODE=false
+GEMMA_MODEL=gemma-4-26b-a4b-it
 GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite
 # optional:
 VITE_SUPABASE_URL
@@ -400,7 +402,7 @@ If signed in + Supabase configured, completed diagnoses can persist to `repair_s
 | Topic | Detail |
 |---|---|
 | Cold start | First `/api` call after idle may be slower on Vercel |
-| Fast demo | Prefer Flash Lite for snappy hackathon demos; Gemma available when `FAST_DEMO_MODE=false` |
+| Gemma-first | Prefer `GEMMA_MODEL` for diagnosis; Flash Lite is fallback only |
 | Locale mid-chat | Switch language on Profile, then **Start over** for a clean localized session |
 | Preview SSO | Protected preview URLs can break `/api` fetches; use Production URL for demos |
 

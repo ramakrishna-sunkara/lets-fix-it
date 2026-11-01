@@ -28,12 +28,12 @@ export function StageChip({ stage }: { stage: DiagnosticStage }) {
         return (
           <span
             key={item}
-            className={`rounded-full border px-3 py-1 text-xs tracking-wide ${
+            className={`md-chip ${
               isActive
-                ? 'border-accent bg-accent-soft text-accent'
+                ? 'md-chip-filter-active'
                 : isPast
-                  ? 'border-line bg-paper text-charcoal'
-                  : 'border-line/70 text-muted'
+                  ? 'md-chip-selected'
+                  : ''
             }`}
           >
             {labels[item]}

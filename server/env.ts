@@ -20,9 +20,9 @@ export function loadServerEnv(): ServerEnv {
     process.env.GEMINI_FALLBACK_MODEL?.trim() || 'gemini-3.5-flash-lite'
   const apiPort: number = Number(process.env.API_PORT || 8787)
   const isFastDemoMode: boolean =
-    (process.env.FAST_DEMO_MODE || 'true').trim().toLowerCase() !== 'false'
+    (process.env.FAST_DEMO_MODE || 'false').trim().toLowerCase() === 'true'
   const gemmaTimeoutMs: number = Number(
-    process.env.GEMMA_TIMEOUT_MS || (isFastDemoMode ? 8000 : 20000),
+    process.env.GEMMA_TIMEOUT_MS || (isFastDemoMode ? 12000 : 25000),
   )
   const maxOutputTokens: number = Number(
     process.env.DIAGNOSIS_MAX_OUTPUT_TOKENS || (isFastDemoMode ? 2048 : 4096),

@@ -87,16 +87,19 @@ export async function diagnoseProblem(payload: {
   productSummary?: Record<string, string>
   diagnosticStage?: string
   locale?: string
-}): Promise<DiagnosisResponse> {
-  const data = await requestJson<{ diagnosis: DiagnosisResponse }>(
-    '/api/diagnose',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  )
-  return data.diagnosis
+}): Promise<{ diagnosis: DiagnosisResponse; modelUsed: string }> {
+  const data = await requestJson<{
+    diagnosis: DiagnosisResponse
+    modelUsed: string
+  }>('/api/diagnose', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  return {
+    diagnosis: data.diagnosis,
+    modelUsed: data.modelUsed || 'unknown',
+  }
 }
 
 export async function searchYoutube(query: string): Promise<{

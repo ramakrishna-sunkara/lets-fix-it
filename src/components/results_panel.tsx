@@ -20,8 +20,10 @@ import { shouldShowNearbyRepairs } from '../lib/nearby_repairs'
 
 export function ResultsPanel({
   diagnosis,
+  modelUsed = null,
 }: {
   diagnosis: DiagnosisResponse | null
+  modelUsed?: string | null
 }) {
   const { t } = useLocale()
 
@@ -106,7 +108,7 @@ export function ResultsPanel({
 
   if (!diagnosis) {
     return (
-      <aside className="rounded-3xl border border-dashed border-line bg-paper/70 p-6 text-sm text-muted">
+      <aside className="md-card-outlined border-dashed p-6 text-sm text-muted">
         {t.results.empty}
       </aside>
     )
@@ -125,15 +127,22 @@ export function ResultsPanel({
 
   return (
     <aside className="space-y-4">
-      <div className="rounded-3xl border border-line bg-paper p-5 shadow-soft">
+      <div className="md-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-[0.14em] text-muted">
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
               Results
             </p>
-            <h2 className="mt-1 font-display text-2xl text-charcoal">
+            <h2 className="mt-1 text-2xl font-normal tracking-tight text-charcoal">
               Structured diagnosis
             </h2>
+            {modelUsed ? (
+              <p className="mt-1 text-xs font-medium text-accent">
+                {modelUsed.toLowerCase().includes('gemma')
+                  ? `Diagnosed with Gemma · ${modelUsed}`
+                  : `Model used · ${modelUsed}`}
+              </p>
+            ) : null}
           </div>
           <StageChip stage={diagnosis.diagnostic_stage || 'gathering'} />
         </div>
@@ -152,7 +161,7 @@ export function ResultsPanel({
             : 'Product details still incomplete'}
         </p>
         {diagnosis.confidence_explanation ? (
-          <p className="mt-3 rounded-xl bg-warm-white px-3 py-2 text-sm text-muted">
+          <p className="mt-3 rounded-xl bg-surface-container-low px-3 py-2 text-sm text-muted">
             {diagnosis.confidence_explanation}
           </p>
         ) : null}
@@ -161,8 +170,8 @@ export function ResultsPanel({
       <EvidenceLadder diagnosis={diagnosis} />
 
       {safetyWarnings.length > 0 || diagnosis.requires_professional_help ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-danger">
-          <div className="mb-2 flex items-center gap-2 font-semibold">
+        <div className="rounded-2xl bg-danger-container p-4 text-sm text-danger">
+          <div className="mb-2 flex items-center gap-2 font-medium">
             <ShieldAlert className="h-4 w-4" />
             Safety first
           </div>
@@ -183,8 +192,8 @@ export function ResultsPanel({
         <NearbyRepairPanel diagnosis={diagnosis} />
       ) : null}
 
-      <div className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-        <h3 className="flex items-center gap-2 text-sm font-semibold">
+      <div className="md-card p-4">
+        <h3 className="flex items-center gap-2 text-sm font-medium">
           <Wrench className="h-4 w-4 text-accent" />
           Recommended next action
         </h3>
@@ -193,8 +202,8 @@ export function ResultsPanel({
         </p>
       </div>
 
-      <div className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-        <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+      <div className="md-card p-4">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-medium">
           <PlayCircle className="h-4 w-4 text-accent" />
           Repair videos
         </h3>
@@ -269,8 +278,8 @@ export function ResultsPanel({
         </ul>
       </div>
 
-      <div className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-        <h3 className="text-sm font-semibold">Repair instructions</h3>
+      <div className="md-card p-4">
+        <h3 className="text-sm font-medium">Repair instructions</h3>
         {!showDiy && diagnosis.requires_professional_help ? (
           <p className="mt-2 text-sm text-muted">
             DIY steps are hidden because professional assistance is safer for
@@ -320,8 +329,8 @@ export function ResultsPanel({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-        <h3 className="text-sm font-semibold">Replacement part searches</h3>
+      <div className="md-card p-4">
+        <h3 className="text-sm font-medium">Replacement part searches</h3>
         <p className="mt-1 text-xs text-muted">
           Search links only — no invented prices or compatibility claims.
         </p>

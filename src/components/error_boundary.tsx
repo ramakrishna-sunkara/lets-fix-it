@@ -33,13 +33,13 @@ export class ErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className="mx-auto max-w-lg px-4 py-16 text-center">
-          <h1 className="font-display text-2xl text-charcoal">
+          <h1 className="text-2xl font-normal tracking-tight text-charcoal">
             Something went wrong
           </h1>
           <p className="mt-2 text-sm text-muted">{this.state.message}</p>
           <button
             type="button"
-            className="mt-6 rounded-xl bg-charcoal px-4 py-2 text-sm text-warm-white"
+            className="md-btn-filled mt-6"
             onClick={() => {
               try {
                 localStorage.removeItem('lfi_guest_session_v1')

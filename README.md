@@ -1,13 +1,15 @@
 # LET'S FIX IT AI
 
-Hackathon POC: an honest AI repair diagnosis assistant.
+Hacktoberfest Hack Day Vizag × AI for Vizag POC: an honest AI repair diagnosis assistant powered by **open-weight Gemma 4**.
 
 **Before you replace it, let's understand it and see whether we can fix it.**
 
+**Prize tracks:** [Best Use of Gemma 4](https://www.mlh.com/events/hacktoberfest-hack-day-vizag-x-ai-for-vizag/challenges/01a03b87-be22-9180-5e2d-b3beeb66666d) · [Best Open-Source AI Project](https://www.mlh.com/events/hacktoberfest-hack-day-vizag-x-ai-for-vizag/challenges/01a0d987-0c41-12ea-13ac-5b85755dc2f3) — see [`docs/HACK_DAY.md`](docs/HACK_DAY.md).
+
 ## What it does
 
-1. Describe a product problem in chat (optional photo).
-2. Gemma 4 asks targeted follow-ups and returns a structured diagnosis.
+1. Describe a product problem in chat (optional photo — multimodal Gemma).
+2. **Gemma 4** asks targeted follow-ups and returns a structured diagnosis.
 3. The UI separates **Observed / Possible causes / Still unknown**.
 4. Real YouTube repair-video search (when configured).
 5. External parts search links (no invented prices or compatibility).
@@ -39,7 +41,7 @@ npm run dev
 | `GEMINI_API_KEY` | `.env` / Vercel env (server only) | Google AI Studio key |
 | `GEMMA_MODEL` | optional | Default `gemma-4-26b-a4b-it` |
 | `GEMINI_FALLBACK_MODEL` | optional | Default `gemini-3.5-flash-lite` |
-| `FAST_DEMO_MODE` | optional | `true` = prefer Flash Lite for snappy demos |
+| `FAST_DEMO_MODE` | optional | `false` recommended — always Gemma-first; `true` only shortens Gemma timeout |
 | `YOUTUBE_API_KEY` | `.env` / Vercel env (server only) | YouTube Data API v3 search |
 
 Get a Gemini/Gemma key: [AI Studio](https://aistudio.google.com/) · Docs: [Gemma on Gemini API](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api)
@@ -79,7 +81,7 @@ GEMINI_API_KEY=
 YOUTUBE_API_KEY=
 GEMMA_MODEL=gemma-4-26b-a4b-it
 GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite
-FAST_DEMO_MODE=true
+FAST_DEMO_MODE=false
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 ```

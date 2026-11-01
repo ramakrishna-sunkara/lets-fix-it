@@ -316,11 +316,13 @@ async function callDiagnosisModel(
     diagnosticStage,
     locale,
   )
-  // Fast demo: use Flash models only (skip slow/flaky Gemma for live demos).
-  // Normal mode: prefer Gemma with timeout, then fall back to Flash.
-  const modelsToTry: string[] = env.isFastDemoMode
-    ? [env.fallbackModel, 'gemini-3.5-flash-lite', 'gemini-flash-latest']
-    : [env.gemmaModel, env.fallbackModel, 'gemini-3.5-flash-lite']
+  // Always prefer Gemma first (hackathon judging / Gemma category).
+  // Flash Lite is fallback only if Gemma times out or fails.
+  const modelsToTry: string[] = [
+    env.gemmaModel,
+    env.fallbackModel,
+    'gemini-3.5-flash-lite',
+  ]
   const uniqueModels: string[] = [
     ...new Set(modelsToTry.map((model) => model.trim()).filter(Boolean)),
   ]

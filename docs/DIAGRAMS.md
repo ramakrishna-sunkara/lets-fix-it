@@ -132,7 +132,7 @@ flowchart LR
 
   subgraph API
     P[Add system rules<br/>+ language rule]
-    C[Call Flash Lite<br/>or Gemma]
+    C[Call Gemma 4 first<br/>Flash Lite fallback]
     Z[Validate JSON]
   end
 

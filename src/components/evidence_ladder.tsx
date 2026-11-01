@@ -23,8 +23,8 @@ export function EvidenceLadder({
 
   return (
     <div className="grid gap-3 md:grid-cols-3">
-      <section className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-        <h3 className="text-sm font-semibold text-charcoal">Observed</h3>
+      <section className="md-card p-4">
+        <h3 className="text-sm font-medium text-charcoal">Observed</h3>
         <p className="mt-1 text-xs text-muted">
           Supported by your description or photograph
         </p>
@@ -36,8 +36,8 @@ export function EvidenceLadder({
           )}
         </ul>
       </section>
-      <section className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-        <h3 className="text-sm font-semibold text-charcoal">Possible causes</h3>
+      <section className="md-card p-4">
+        <h3 className="text-sm font-medium text-charcoal">Possible causes</h3>
         <p className="mt-1 text-xs text-muted">Hypotheses — not confirmed faults</p>
         <ul className="mt-3 space-y-3 text-sm text-graphite">
           {possibleCauses.length === 0 ? (
@@ -55,8 +55,8 @@ export function EvidenceLadder({
           )}
         </ul>
       </section>
-      <section className="rounded-2xl border border-line bg-paper p-4 shadow-soft">
-        <h3 className="text-sm font-semibold text-charcoal">Still unknown</h3>
+      <section className="md-card p-4">
+        <h3 className="text-sm font-medium text-charcoal">Still unknown</h3>
         <p className="mt-1 text-xs text-muted">Needs checks or clearer evidence</p>
         <ul className="mt-3 space-y-2 text-sm text-graphite">
           {unknowns.length === 0 ? (

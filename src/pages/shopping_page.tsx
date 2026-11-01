@@ -34,7 +34,7 @@ export function ShoppingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl text-charcoal">
+        <h1 className="text-3xl font-normal tracking-tight text-charcoal">
           {t.shopping.title}
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-muted">{t.shopping.subtitle}</p>
@@ -42,7 +42,7 @@ export function ShoppingPage() {
 
       <form
         onSubmit={(event) => void onSubmit(event)}
-        className="flex flex-col gap-3 rounded-3xl border border-line bg-paper p-4 shadow-soft sm:flex-row"
+        className="md-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center"
       >
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
@@ -50,13 +50,13 @@ export function ShoppingPage() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t.shopping.placeholder}
-            className="w-full rounded-xl border border-line bg-warm-white py-2.5 pl-10 pr-3 text-sm outline-none ring-accent focus:ring-2"
+            className="md-field !rounded-full pl-10"
           />
         </div>
         <button
           type="submit"
           disabled={isLoading || !query.trim()}
-          className="rounded-xl bg-charcoal px-4 py-2.5 text-sm text-warm-white disabled:opacity-50"
+          className="md-btn-filled disabled:opacity-38"
         >
           {isLoading ? t.shopping.searching : t.shopping.findLinks}
         </button>
@@ -69,9 +69,9 @@ export function ShoppingPage() {
         {results.map((result) => (
           <li
             key={`${result.merchant}-${result.url}`}
-            className="rounded-2xl border border-line bg-paper p-4 shadow-soft"
+            className="md-card p-4"
           >
-            <p className="text-sm font-semibold">{result.title}</p>
+            <p className="text-sm font-medium">{result.title}</p>
             <p className="mt-1 text-xs uppercase tracking-wide text-muted">
               {result.merchant}
             </p>

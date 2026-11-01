@@ -55,8 +55,10 @@ export function AuthPage() {
 
   if (!isConfigured) {
     return (
-      <div className="mx-auto max-w-lg rounded-3xl border border-line bg-paper p-6 shadow-soft">
-        <h1 className="font-display text-3xl">{t.auth.notConfiguredTitle}</h1>
+      <div className="md-card mx-auto max-w-lg p-6">
+        <h1 className="text-3xl font-normal tracking-tight">
+          {t.auth.notConfiguredTitle}
+        </h1>
         <p className="mt-3 text-sm text-muted">{t.auth.notConfiguredBody}</p>
       </div>
     )
@@ -74,24 +76,24 @@ export function AuthPage() {
         : t.auth.signIn
 
   return (
-    <div className="mx-auto max-w-lg rounded-3xl border border-line bg-paper p-6 shadow-soft">
-      <h1 className="font-display text-3xl">{title}</h1>
+    <div className="md-card mx-auto max-w-lg p-6">
+      <h1 className="text-3xl font-normal tracking-tight">{title}</h1>
       <form
         onSubmit={(event) => void onAuthSubmit(event)}
         className="mt-4 space-y-3"
       >
-        <label className="block text-sm">
+        <label className="block text-sm font-medium">
           {t.auth.email}
           <input
             type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mt-1 w-full rounded-xl border border-line px-3 py-2"
+            className="md-field mt-1"
           />
         </label>
         {mode !== 'reset' ? (
-          <label className="block text-sm">
+          <label className="block text-sm font-medium">
             {t.auth.password}
             <input
               type="password"
@@ -99,23 +101,23 @@ export function AuthPage() {
               minLength={6}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-line px-3 py-2"
+              className="md-field mt-1"
             />
           </label>
         ) : null}
         <button
           type="submit"
           disabled={isBusy}
-          className="w-full rounded-xl bg-charcoal py-2.5 text-sm text-warm-white"
+          className="md-btn-filled w-full disabled:opacity-38"
         >
           {isBusy ? t.auth.pleaseWait : t.auth.continue}
         </button>
       </form>
-      <div className="mt-4 flex flex-wrap gap-3 text-sm">
+      <div className="mt-4 flex flex-wrap gap-2 text-sm">
         {mode !== 'signin' ? (
           <button
             type="button"
-            className="text-accent underline"
+            className="md-btn-text"
             onClick={() => setMode('signin')}
           >
             {t.auth.signIn}
@@ -124,7 +126,7 @@ export function AuthPage() {
         {mode !== 'signup' ? (
           <button
             type="button"
-            className="text-accent underline"
+            className="md-btn-text"
             onClick={() => setMode('signup')}
           >
             {t.auth.register}
@@ -133,7 +135,7 @@ export function AuthPage() {
         {mode !== 'reset' ? (
           <button
             type="button"
-            className="text-accent underline"
+            className="md-btn-text"
             onClick={() => setMode('reset')}
           >
             {t.auth.forgotPassword}
